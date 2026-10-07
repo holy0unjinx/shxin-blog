@@ -1,0 +1,2771 @@
+/* 본문 로마자는 Computer Modern Unicode의 CMU Serif를 사용한다.
+   tools/serif-font.sh가 네 스타일을 라틴 기본/확장 WOFF2로 나눈다.
+   unicode-range는 스크립트와 일치하며 한글과 화살표는 신명조가 맡는다. */
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-regular.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-regular-ext.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  /* 라틴 확장. U+0131과 U+0152-0153은 위가 이미 집었으므로 여기서 뺀다 —
+     두 범위가 겹치면 브라우저가 헛걸음을 한다. */
+  unicode-range:
+    U+0100-0130,
+    U+0132-0151,
+    U+0154-024F,
+    U+0259,
+    U+1E00-1EFF,
+    U+20A0-20AB,
+    U+20AD-20CF,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-bold.woff2") format("woff2");
+  font-display: swap;
+  font-weight: bold;
+  font-style: normal;
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-bold-ext.woff2") format("woff2");
+  font-display: swap;
+  font-weight: bold;
+  font-style: normal;
+  /* 라틴 확장. U+0131과 U+0152-0153은 위가 이미 집었으므로 여기서 뺀다 —
+     두 범위가 겹치면 브라우저가 헛걸음을 한다. */
+  unicode-range:
+    U+0100-0130,
+    U+0132-0151,
+    U+0154-024F,
+    U+0259,
+    U+1E00-1EFF,
+    U+20A0-20AB,
+    U+20AD-20CF,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-italic.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: italic;
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-italic-ext.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: italic;
+  /* 라틴 확장. U+0131과 U+0152-0153은 위가 이미 집었으므로 여기서 뺀다 —
+     두 범위가 겹치면 브라우저가 헛걸음을 한다. */
+  unicode-range:
+    U+0100-0130,
+    U+0132-0151,
+    U+0154-024F,
+    U+0259,
+    U+1E00-1EFF,
+    U+20A0-20AB,
+    U+20AD-20CF,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-bolditalic.woff2") format("woff2");
+  font-display: swap;
+  font-weight: bold;
+  font-style: italic;
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "CMU Serif";
+  src: url("fonts/cmu-bolditalic-ext.woff2") format("woff2");
+  font-display: swap;
+  font-weight: bold;
+  font-style: italic;
+  /* 라틴 확장. U+0131과 U+0152-0153은 위가 이미 집었으므로 여기서 뺀다 —
+     두 범위가 겹치면 브라우저가 헛걸음을 한다. */
+  unicode-range:
+    U+0100-0130,
+    U+0132-0151,
+    U+0154-024F,
+    U+0259,
+    U+1E00-1EFF,
+    U+20A0-20AB,
+    U+20AD-20CF,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+/* 조선신명조. 한글·한자·가나와 화살표는 이 글꼴이 맡는다. */
+/* 한 벌이던 글꼴을 두 몫으로 나눠 둔다(tools/split-font.sh). 한자가 원본의
+   81%인데 지금 글에는 한 자도 없고, 앞으로 다국어 글이 늘어도 한자를 쓰는
+   글은 그 중 일부일 뿐이다. unicode-range가 서로 겹치지 않으므로 브라우저는
+   페이지에 실제로 나온 글자가 든 쪽만 받는다. 여기 적은 범위와
+   tools/split-font.sh에 적은 범위는 반드시 같아야 한다. */
+@font-face {
+  font-family: "신명조";
+  src: url("fonts/sm-base.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  /* 차례로 화살표, 중일한 부호, 가나, 한글 호환 자모, 한글 음절, 전각·반각. */
+  unicode-range:
+    U+2190-21FF,
+    U+3000-303F,
+    U+3040-30FF,
+    U+3130-318F,
+    U+AC00-D7A3,
+    U+FF00-FFEF;
+}
+@font-face {
+  font-family: "신명조";
+  src: url("fonts/sm-han.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  /* 한자와 한자 호환. */
+  unicode-range:
+    U+4E00-9FFF,
+    U+F900-FAFF;
+}
+/* 코드 글꼴. 로마자·숫자·부호는 Geist Mono가 지고, Geist Mono에 없는 한글은
+   아래 Pretendard가 받는다. 두 @font-face의 unicode-range가 겹치지 않으므로
+   코드에 한글이 한 자도 없는 글은 Pretendard를 아예 받지 않는다.
+   두 파일은 tools/code-fonts.sh가 만든다. */
+@font-face {
+  font-family: "Geist Mono";
+  src: url("fonts/geist-mono.woff2") format("woff2");
+  font-display: swap;
+  /* 가변 글꼴이라 한 파일이 굵기 전부를 진다. 문법 강조가 굵게 쓰는 자리도
+     이 한 벌로 되므로, 브라우저가 굵기를 흉내 낼 일이 없다. */
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Pretendard Code";
+  src: url("fonts/pretendard-code.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  /* 신명조 base와 같은 구간이다. 여기 적은 범위와 tools/code-fonts.sh에 적은
+     범위는 반드시 같아야 한다. */
+  unicode-range:
+    U+3000-303F,
+    U+3040-30FF,
+    U+3130-318F,
+    U+AC00-D7A3,
+    U+FF00-FFEF;
+}
+/* === 팔레트: tools/theme.mjs가 만든다. 손으로 고치지 않는다. === */
+/* 출처는 tools/theme.json("my-theme")이다. 어두운 벌이 그 파일에 적힌
+   그대로이고, 밝은 벌은 base와 text의 한가운데를 축으로 밝기를 뒤집어
+   얻는다 — tools/theme.mjs의 reflect()가 그 한 줄이다.
+
+   이 사다리의 회색은 채도가 전부 0.000이다. 색을 쓰지 않는다는 이 종이의
+   규칙과, 위계는 색이 아니라 크기와 굵기로 만든다는 원본 시스템의 규칙이
+   같은 말이어서, 액센트 여덟 색은 가져오지 않았다. */
+:root {
+  --color-crust: #ffffff;
+  --color-mantle: #ffffff;
+  --color-base: #f8f8f8;
+  --color-surface0: #e9e9e9;
+  --color-surface1: #d5d5d5;
+  --color-surface2: #bbbbbb;
+  --color-overlay0: #676767;
+  --color-overlay1: #5a5a5a;
+  --color-overlay2: #4e4e4e;
+  --color-subtext0: #3c3c3c;
+  --color-subtext1: #2e2e2e;
+  --color-text: #0b0b0b;
+
+  --ink: var(--color-text); /* 본문 글자 */
+  --muted: var(--color-subtext0); /* 물러난 글자 — 날짜, 라벨, 설명 */
+  --paper: var(--color-crust); /* 종이 */
+  --hairline: var(--color-surface1); /* 가장 여린 선 — 줄 사이 */
+  --line: var(--color-surface2); /* 테두리 */
+  --accent: var(--color-text); /* 고른 것, 지금 있는 자리 */
+  --bg-mark: var(--color-surface0); /* 칠한 바탕 — 코드, 형광, 알림 상자, 표 강조 칸 */
+}
+:root[data-theme="dark"] {
+  --color-crust: #000000;
+  --color-mantle: #030303;
+  --color-base: #0b0b0b;
+  --color-surface0: #151515;
+  --color-surface1: #232323;
+  --color-surface2: #373737;
+  --color-overlay0: #848484;
+  --color-overlay1: #929292;
+  --color-overlay2: #a0a0a0;
+  --color-subtext0: #b5b5b5;
+  --color-subtext1: #c6c6c6;
+  --color-text: #f8f8f8;
+  color-scheme: dark;
+}
+@media print {
+  /* 종이는 언제나 밝은 벌이다. 어두운 벌로 읽던 사람이 인쇄하면 흰 종이에
+     흰 글자가 나온다 — body 하나를 덮는 것으로는 모자라고, 제 색을 스스로
+     잡는 마흔 몇 자리가 그대로 어두운 값을 쓴다. 사다리를 여기서 한 번
+     되돌리면 본문부터 그래프와 다이어그램까지 전부 따라온다. */
+  :root,
+  :root[data-theme="dark"] {
+    --color-crust: #ffffff;
+    --color-mantle: #ffffff;
+    --color-base: #f8f8f8;
+    --color-surface0: #e9e9e9;
+    --color-surface1: #d5d5d5;
+    --color-surface2: #bbbbbb;
+    --color-overlay0: #676767;
+    --color-overlay1: #5a5a5a;
+    --color-overlay2: #4e4e4e;
+    --color-subtext0: #3c3c3c;
+    --color-subtext1: #2e2e2e;
+    --color-text: #0b0b0b;
+    color-scheme: light;
+    /* 종이에는 바탕이 찍히지 않는다. 화면에서 구조를 지던 여린 선은 빛을
+       등지고 있어 보이던 것이라, 잉크로는 한 단 더 내려야 남는다. */
+    --line: var(--color-overlay0);
+  }
+}
+/* === 팔레트 끝 === */
+:root {
+  /* 영문은 CMU Serif, 한글은 신명조. 뒤쪽은 웹폰트 로드 실패 시 대체 글꼴이다. */
+  --serif:
+    "CMU Serif", "Times New Roman", Times, "신명조", "조선신명조", "바탕", "Batang",
+    serif;
+  /* 코드 글꼴 한 벌. 한글은 위 unicode-range 때문에 Geist Mono를 지나쳐
+     Pretendard로 떨어진다. 웹폰트가 못 뜬 경우를 대비해 뒤에 시스템
+     고정폭을 남긴다. */
+  --mono:
+    "Geist Mono", "Pretendard Code", "Pretendard", "Consolas", "Courier New",
+    monospace;
+  /* 간격 사다리. 이 종이가 쓰는 여백은 여기 아홉 단 중 하나다 — 자리마다
+     눈으로 고른 값이 흩어져 있으면 무엇이 의도이고 무엇이 사고인지 알 수
+     없다. 글자 크기와 테두리 굵기는 여백이 아니므로 이 사다리를 따르지
+     않는다. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+}
+* {
+  box-sizing: border-box;
+}
+/* 글을 끌어서 고른 자리. 브라우저 기본값은 파란색이라, 색을 쓰지 않는 이
+   종이에서 유일하게 색이 나타나는 순간이 된다. 잉크와 종이를 맞바꾸는 것으로
+   대신한다 — 어두운 벌에서도 저절로 뒤집힌다. 그림 속 글자도 같은 값을
+   쓰므로(.chart-svg / .diagram-svg) 본문과 그림이 따로 놀지 않는다. */
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+/* 같은 문서 안의 #자리로 뛰는 것은 읽는 쪽에게 장면이 갈리는 일이다.
+   목차·각주·참고문헌·그림 번호 모두 같은 쪽 안을 가리키므로, 건너뛰는
+   대신 밀어 보내 어디에서 어디로 갔는지가 눈에 남게 한다. 동작을 줄여 둔
+   독자에게는 아래 "동작 줄이기" 규칙이 이것을 다시 끈다. */
+html {
+  background: var(--paper);
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.paper {
+  width: min(100% - 40px, 720px);
+  margin: auto;
+}
+.site-head {
+  min-height: 72px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* 좁은 화면에서 이름과 차림표를 한 줄에 다 못 넣으면 잘라내는 대신 줄을
+     바꾼다. 폭이 얼마든 헤더가 종이 밖으로 나가지 않는다. */
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font:
+    12px Arial,
+    sans-serif;
+  color: var(--ink);
+}
+.wordmark {
+  color: var(--ink);
+  font: 700 22px var(--serif);
+  text-decoration: none;
+}
+
+.wordmark span,
+.read span {
+  color: var(--ink);
+}
+.archive-title {
+  padding: 42px 0 14px;
+  font:
+    13px Arial,
+    sans-serif;
+}
+.archive-title p {
+  margin: 0;
+}
+.eyebrow {
+  color: var(--ink);
+  font:
+    12px/1.2 Arial,
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.article h1,
+.not-found h1 {
+  font-family: var(--serif);
+  font-size: clamp(38px, 7vw, 60px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  margin: 17px 0 28px;
+  font-weight: 700;
+}
+.post-list {
+  border-top: 1px solid var(--line);
+}
+.post-card {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 14px 22px;
+  align-items: start;
+  padding: 23px 0;
+  border-bottom: 1px solid var(--line);
+}
+.post-meta {
+  font:
+    11px Arial,
+    sans-serif;
+  color: var(--muted);
+  grid-column: 1;
+  /* 제목·요약·읽기 링크 세 행에 걸친다. 한 행에만 두면 그 행의 높이를 이
+     칸이 정하고, 줄이 하나 늘 때마다 제목과 요약 사이가 그만큼 벌어진다.
+     -1이 아니라 세어 적는 것은, grid-template-rows가 없어 행이 모두
+     암묵적이고 그럴 때 -1은 첫 선으로 풀리는 탓이다. */
+  grid-row: 1 / span 3;
+  line-height: 1.7;
+}
+.post-meta span {
+  display: block;
+  color: var(--ink);
+}
+.post-card h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  grid-column: 2;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0;
+}
+.post-card h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.post-card > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  grid-column: 2;
+  margin: 0;
+}
+.read {
+  color: var(--ink);
+  font:
+    11px Arial,
+    sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  grid-column: 2;
+}
+.read:hover,
+.post-card h2 a:hover {
+  color: var(--muted);
+}
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 72px;
+  padding: var(--space-4) 0 28px;
+  color: var(--muted);
+  font:
+    11px Arial,
+    sans-serif;
+}
+.article {
+  max-width: 720px;
+  margin: 40px auto 0;
+}
+.back {
+  color: var(--ink);
+  font:
+    11px Arial,
+    sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.article-head {
+  padding: 42px 0 28px;
+}
+.article-head .eyebrow {
+  margin: 0;
+}
+.article h1 {
+  font-size: clamp(38px, 6vw, 55px);
+  margin: var(--space-4) 0 18px;
+}
+/* 초록은 본문과 같은 잉크다. 제목 바로 아래에서 글을 여는 문장이지, 곁들이는
+   말이 아니다. 앞에 붙는 이름줄만 굵기로 갈린다. */
+/* 초록과 키워드는 한 크기다. 둘은 제목 아래 같은 층의 글이라, 크기가
+   갈리면 층이 하나 더 있는 것처럼 읽힌다. */
+.deck {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.deck dd,
+.keywords dd {
+  margin: 0;
+}
+.deck dt,
+.keywords dt {
+  font-weight: 700;
+}
+/* 초록도 본문과 같은 문단이므로 첫 줄을 같은 1em으로 들여쓴다. 이름줄
+   뒤의 글이 제 상자를 가져야 하는 이유는, 이름줄이 블록으로 서 있어서
+   그 뒤 글이 익명 블록으로 남고 익명 블록은 이 들여쓰기를 받지 못하는
+   탓이다. */
+.deck .abstract {
+  font-weight: 400;
+  text-indent: 1em;
+}
+/* 초록 아래 키워드 줄. 형태는 초록과 같고 크기만 한 단계 작다. */
+.keywords {
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+  /* <p>였을 때의 위 14px, 아래 1em을 그대로 적는다. <dl>의 기본 여백은
+     위아래 1em이라 위쪽 값이 달라진다. */
+  margin: 14px 0 15px;
+}
+.rule {
+  border-top: 1px solid var(--line);
+}
+.prose {
+  font-size: 16px;
+  padding-top: 30px;
+}
+.prose > p,
+.prose blockquote,
+.prose li {
+  text-align: justify;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.prose > p {
+  text-indent: 1em;
+  line-height: 1.8;
+}
+/* 목록·표·그림·코드·인용·구분선 뒤에 이어지는 문단은 앞 블록의 연장이므로
+   들여쓰지 않는다. 제목 뒤 문단은 새 문단이라 들여쓴다. */
+.prose > ul + p,
+.prose > ol + p,
+.prose > .table-wrap + p,
+.prose > figure + p,
+.prose > .code-block + p,
+.prose > .math-display + p,
+.prose > .embed + p,
+.prose > blockquote + p,
+.prose > .callout + p,
+.prose > hr + p {
+  text-indent: 0;
+}
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: var(--serif);
+  margin: 2.4em 0 0.7em;
+  line-height: 1.3;
+  scroll-margin-top: 24px;
+}
+/* 뛰어 닿는 자리가 창 맨 위에 딱 붙으면 그 줄이 화면 테두리에 씹힌다.
+   제목과 같은 여유를 다른 #자리에도 준다: 각주·참고문헌 항목, 번호가 붙는
+   그림·도표·코드 블록(코드도 figure다). */
+.notes li,
+.prose figure,
+.prose .table-wrap {
+  scroll-margin-top: 24px;
+}
+.prose h2 {
+  font-size: 27px;
+}
+.prose h3 {
+  font-size: 20px;
+}
+.prose a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+.prose code {
+  background: var(--bg-mark);
+  font: 15px var(--mono);
+  padding: 0.15em 0.35em;
+}
+/* 글꼴은 <pre>가 진다. 예전에는 .prose code만 지고 있었는데, 줄 번호는
+   <code> 없는 <pre>라 본문 명조를 물려받았다 — 번호와 코드 줄의 높이가
+   달라져 둘이 어긋나 있었다. 강조 띠(.code-layers)도 같은 값을 쓴다. */
+.prose pre {
+  background: var(--bg-mark);
+  color: var(--ink);
+  font: 15px/1.6 var(--mono);
+  overflow: auto;
+  padding: var(--space-2) var(--space-4);
+  line-height: 1.6;
+}
+.prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  line-height: 1.6;
+}
+.prose blockquote {
+  /* border-left: 1px solid var(--ink); */
+  color: var(--ink);
+  margin: 1.8em 0;
+  padding: 0.2em 2em;
+}
+
+/* ─── 알림 상자 ───────────────────────────────────────────────────────────
+   인용 첫 줄에 이름표를 달면 나오는 상자(`> [!NOTE]`). 색은 쓰지 않는다 —
+   그래프와 같은 규칙이라 라이트·다크가 저절로 따라온다. 종류는 이름표
+   글자가 가르고, 왼쪽 테두리 굵기가 무게를 거든다: 참고·도움말 2px,
+   중요 3px, 주의·경고 5px. 굵기는 색과 달리 흑백 인쇄에서도 남는다. */
+.prose .callout {
+  background: var(--bg-mark);
+  border-left: 3px solid var(--ink);
+  margin: 1.8em 0;
+  padding: 0.9em 1.2em;
+}
+.prose .callout-note,
+.prose .callout-tip {
+  border-left-color: var(--muted);
+  border-left-width: 2px;
+}
+.prose .callout-warning,
+.prose .callout-caution {
+  border-left-width: 5px;
+}
+/* 이름표는 제목 노릇을 하므로 아래 본문을 들여쓰지 않는다. 본문 문단은
+   .prose의 자식이 아니라 여기서 여백을 따로 적는다. */
+.prose .callout-title {
+  color: var(--ink);
+  font:
+    700 12px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-indent: 0;
+  text-transform: uppercase;
+}
+.prose .callout p {
+  text-indent: 0;
+}
+.prose .callout-title + p {
+  margin: 0.5em 0 0;
+}
+.prose .callout > p:last-child {
+  margin-bottom: 0;
+}
+/* 접히는 상자(`> [!DETAILS] 제목`). 손잡이는 차트 자료표와 같은 층의
+   글자이고 여는 표시도 같은 +/− 한 쌍이다. */
+.prose .callout-details {
+  background: none;
+  border-left-color: var(--muted);
+  border-left-width: 2px;
+  padding: 0;
+}
+.prose .callout-details > summary {
+  color: var(--ink);
+  cursor: pointer;
+  font:
+    700 12px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  list-style: none;
+  padding: 0.7em 1.2em;
+  text-transform: uppercase;
+}
+.prose .callout-details > summary::-webkit-details-marker {
+  display: none;
+}
+.prose .callout-details > summary::before {
+  content: "+ ";
+}
+.prose .callout-details[open] > summary::before {
+  content: "− ";
+}
+.prose .callout-details > p {
+  margin: 0;
+  padding: 0 1.2em 0.9em;
+}
+
+/* ─── 할 일 목록 ──────────────────────────────────────────────────────────
+   상자는 잠겨 있다. 브라우저 기본 상자는 켜진 자리에 파란색을 들고 오는데
+   이 종이에는 색이 없으므로, 테두리와 체크를 직접 그린다. */
+.prose .task-list {
+  list-style: none;
+  padding-left: 1.2em;
+}
+.prose li.task {
+  align-items: baseline;
+  display: flex;
+  /* 한 칸이 여러 줄로 늘어나도 상자는 첫 줄에 남고, 딸린 목록은 아래로
+     내려간다. */
+  flex-wrap: wrap;
+  gap: 0.5em;
+  /* 칸이 짧으면 justify가 낱말 사이를 벌려 놓는다. */
+  text-align: left;
+}
+.prose li.task > span {
+  flex: 1;
+}
+.prose li.task > ul,
+.prose li.task > ol {
+  flex: 0 0 100%;
+}
+.prose li.task input[type="checkbox"] {
+  appearance: none;
+  border: 1px solid var(--muted);
+  /* 글자 크기를 따라 커지되 줄 높이를 밀지 않는다. */
+  flex: none;
+  height: 0.85em;
+  margin: 0;
+  position: relative;
+  width: 0.85em;
+}
+/* 체크는 두 변만 남긴 사각형을 눕힌 것이다. 글꼴에 없는 글자를 찾지
+   않으므로 어느 환경에서나 같은 모양으로 나온다. */
+.prose li.task input[type="checkbox"]:checked::before {
+  border-bottom: 1.5px solid var(--ink);
+  border-right: 1.5px solid var(--ink);
+  content: "";
+  height: 0.5em;
+  left: 0.12em;
+  position: absolute;
+  top: -0.04em;
+  transform: rotate(40deg);
+  width: 0.28em;
+}
+
+/* ─── 지운 글 · 칠한 글 · 첨자 ────────────────────────────────────────────
+   mark의 브라우저 기본값은 노란 바탕에 검은 글자다. 다크 테마에서 글자색만
+   고정되면 읽히지 않으므로 바탕과 글자를 둘 다 우리 값으로 덮는다. 칠한
+   자리는 색이 아니라 밑선 한 줄로 알린다. */
+.prose del {
+  color: var(--muted);
+  text-decoration-thickness: 1px;
+}
+.prose mark {
+  background: var(--bg-mark);
+  box-shadow: inset 0 -1px 0 var(--ink);
+  color: inherit;
+  padding: 0 0.15em;
+}
+/* 각주 번호는 자기 크기를 따로 쓰므로 건드리지 않는다. */
+.prose sup:not(.footnote-ref),
+.prose sub {
+  font-size: 0.75em;
+  line-height: 0;
+}
+.prose figure {
+  margin: 2em 0;
+}
+/* 그림 둘을 한 줄에. 칸 수는 문법이 정하고(--cols), 좁은 화면에서는 한 줄에
+   하나로 돌아간다 — 나란히 두는 뜻은 비교인데, 칸이 좁아 글자가 안 읽히면
+   비교할 것이 남지 않는다. */
+.prose .figure-row {
+  display: grid;
+  gap: 1.4em;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  margin: 2em 0;
+}
+.prose .figure-row > figure {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .prose .figure-row {
+    grid-template-columns: 1fr;
+  }
+}
+/* 인용의 출처. 인용문 아래 오른쪽에, 한 단계 작게. 그림 캡션이 위에 서는
+   것과 다른 자리이므로 구체성을 맞춰 다시 쓴다. */
+.prose figure.quote {
+  margin: 1.8em 0;
+}
+.prose figure.quote > blockquote {
+  margin: 0;
+}
+.prose figure.quote > figcaption.quote-source {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0.4em 0 0;
+  padding-right: 2em;
+  text-align: right;
+}
+/* 그림·표 목록. 본문 목록이 아니라 찾아가는 길이므로 번호만 굵고 나머지는
+   본문 그대로다. */
+.prose .block-list {
+  margin: 1.6em 0;
+}
+.prose .block-list ol {
+  list-style: none;
+  padding-left: 0;
+}
+.prose .block-list li {
+  margin: 0.25em 0;
+}
+.prose .block-list-number {
+  font-weight: 600;
+}
+/* 용어와 뜻. 뜻은 한 칸 들여쓰고, 용어는 굵게 — 정리 환경의 이름줄과 같은
+   무게다. */
+.prose .definitions {
+  margin: 1.6em 0;
+}
+.prose .definitions dt {
+  font-weight: 600;
+  margin-top: 0.8em;
+}
+.prose .definitions dt:first-child {
+  margin-top: 0;
+}
+.prose .definitions dd {
+  margin: 0.2em 0 0 1.2em;
+}
+/* 초록 아래 키워드는 그 낱말을 다룬 글 목록으로 간다. 밑줄은 긋지 않는다 —
+   초록 바로 아래 한 줄에 낱말이 여럿 서므로, 밑줄이 깔리면 그 줄이 목록이
+   아니라 줄무늬로 읽힌다. 가리키면 그때 긋는다. */
+.keywords a {
+  color: inherit;
+  text-decoration: none;
+}
+.keywords a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose img,
+.prose video {
+  display: block;
+  max-width: 100%;
+  width: 100%;
+}
+/* 그림 캡션은 표·그래프 캡션과 같은 것이다. 한 글에 캡션이 두 종류로
+   보이지 않아야 하므로 자리(그림 위)·글꼴·크기·정렬을 그쪽에 맞춘다.
+   코드 툴바도 <figcaption>이라 요소를 하나 더 적어 그쪽과 갈라 둔다. */
+.prose figure > figcaption {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0 0 var(--space-2);
+  text-align: left;
+  text-indent: 0;
+}
+.prose figure > figcaption .caption-row {
+  align-items: baseline;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+.prose figure > figcaption .caption-aside {
+  color: var(--ink);
+  flex: none;
+  text-align: right;
+  white-space: nowrap;
+}
+.table-wrap {
+  overflow: auto;
+  margin: 2em 0;
+  /* local로 붙은 종이색 두 겹은 내용과 함께 움직이고, scroll로 붙은 그림자
+     두 겹은 상자에 고정된다. 끝에 닿으면 종이색이 그림자를 덮으므로 더 볼
+     것이 남은 쪽에만 그림자가 보인다. */
+  background:
+    linear-gradient(to right, var(--paper) 30%, transparent) left center / 28px
+      100% no-repeat local,
+    linear-gradient(to left, var(--paper) 30%, transparent) right center / 28px
+      100% no-repeat local,
+    linear-gradient(
+        to right,
+        color-mix(in srgb, var(--ink) 16%, transparent),
+        transparent
+      )
+      left center / 14px 100% no-repeat scroll,
+    linear-gradient(
+        to left,
+        color-mix(in srgb, var(--ink) 16%, transparent),
+        transparent
+      )
+      right center / 14px 100% no-repeat scroll;
+}
+.prose table {
+  border-collapse: collapse;
+  font-size: 16px;
+  min-width: 100%;
+}
+/* 칸 테두리 기본값은 없음. 줄은 {border} {border-top}을 쓴 행에만 그린다. */
+.prose td {
+  border: 0;
+  padding: 3px var(--space-2);
+  text-align: left;
+}
+/* 표 확장 속성: {align} {valign} {bg} {bolder} {border} */
+.prose .align-left {
+  text-align: left;
+}
+.prose .align-center {
+  text-align: center;
+}
+.prose .align-right {
+  text-align: right;
+}
+.prose .valign-top {
+  vertical-align: top;
+}
+.prose .valign-middle {
+  vertical-align: middle;
+}
+.prose .valign-bottom {
+  vertical-align: bottom;
+}
+/* 강조 배경은 켜고 끄는 값 하나뿐이다. */
+.prose td.bg-mark {
+  background: var(--bg-mark);
+}
+/* 표에는 헤더 행이 없다. 강조는 {bolder} 속성이 맡고, 글꼴은 본문 명조 그대로다. */
+.prose td.bolder {
+  font-weight: 700;
+}
+/* 테두리는 행이 아니라 칸에 붙는다. 병합된 칸은 병합이 끝나는 행의 줄을 따른다. */
+.prose td.border-none {
+  border-bottom: 0;
+}
+.prose td.border-thin {
+  border-bottom: 1px solid var(--ink);
+}
+.prose td.border-thick {
+  border-bottom: 2px solid var(--ink);
+}
+/* 얇은 줄 두 개. 첫 행 아래에 기본으로 붙는다. */
+.prose td.border-two-lines {
+  border-bottom: 3px double var(--ink);
+}
+.prose td.border-top-none {
+  border-top: 0;
+}
+.prose td.border-top-thin {
+  border-top: 1px solid var(--ink);
+}
+/* 첫 행 칸에는 렌더러가 이 클래스를 기본으로 붙인다. 표의 맨 윗줄은 두껍다. */
+.prose td.border-top-thick {
+  border-top: 2px solid var(--ink);
+}
+.prose td.border-top-two-lines {
+  border-top: 3px double var(--ink);
+}
+/* 세로줄. 기본값은 없음이라 쓴 칸·행·열에만 나온다. */
+.prose td.border-left-none {
+  border-left: 0;
+}
+.prose td.border-left-thin {
+  border-left: 1px solid var(--ink);
+}
+.prose td.border-left-thick {
+  border-left: 2px solid var(--ink);
+}
+.prose td.border-left-two-lines {
+  border-left: 3px double var(--ink);
+}
+.prose td.border-right-none {
+  border-right: 0;
+}
+.prose td.border-right-thin {
+  border-right: 1px solid var(--ink);
+}
+.prose td.border-right-thick {
+  border-right: 2px solid var(--ink);
+}
+.prose td.border-right-two-lines {
+  border-right: 3px double var(--ink);
+}
+/* 캡션은 표 본문과 같은 글꼴·크기·색이고, 오른쪽 요소(n=120 등)만 따로 붙는다.
+   caption 자체는 table-caption으로 둬야 표 너비를 그대로 받는다. flex는 안쪽 줄이 맡는다. */
+.prose caption {
+  caption-side: top;
+  color: var(--ink);
+  padding-bottom: var(--space-2);
+  text-align: left;
+}
+.prose caption .caption-row {
+  display: flex;
+  gap: 1em;
+  justify-content: space-between;
+  width: 100%;
+}
+.prose caption .caption-aside {
+  flex: none;
+  margin-left: auto;
+  text-align: right;
+}
+/* 표 아래 주석과 그림 아래 주석은 같은 것이므로 한 규칙으로 둔다. 둘이
+   갈라지면 한 글에 주석이 두 종류로 보인다. */
+.prose .table-note,
+.prose .chart-note {
+  color: var(--ink);
+  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  text-align: left;
+  text-indent: 0;
+}
+.embed {
+  aspect-ratio: 16/9;
+  margin: 2em 0;
+}
+.embed iframe {
+  border: 0;
+  width: 100%;
+  height: 100%;
+}
+.math {
+  font-family: var(--serif);
+}
+.math-inline {
+  padding: 0 0.15em;
+}
+/* 한 줄을 차지하는 식도 본문 크기다. 예전에는 20px에 KaTeX의 1.21배가
+   얹혀 본문보다 한참 컸다 — 식은 문장의 한 부분이지 표제가 아니다.
+   KaTeX의 1.21배는 여기서 되돌린다(인라인 수식은 그대로 둔다). */
+.math-display {
+  font-size: 1em;
+  overflow: auto;
+  text-align: center;
+}
+.prose .math-display .katex {
+  font-size: 1em;
+}
+.footnote-ref {
+  font:
+    10px Arial,
+    sans-serif;
+  margin-left: 2px;
+}
+/* 툴팁이 달린 낱말. 실선 밑줄인 링크와 구분되도록 점선이고, 커서가 상자의
+   존재를 알린다. 상자 자체는 각주와 같은 .note-tip을 쓴다. */
+.tooltip {
+  border-bottom: 1px dotted var(--ink);
+  cursor: help;
+}
+/* 각주 번호에 얹히는 읽을거리. 자리를 잡는 것은 app.js이고, 여기서는 생김새만
+   정한다. 창에 고정되어 있고 폭이 창보다 좁게 묶여 있으므로, 줄 끝의 각주에
+   붙어도 문서를 옆으로 밀지 못한다. */
+.note-tip {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 7px 10px;
+  pointer-events: none;
+  position: fixed;
+  z-index: 10;
+}
+.note-tip[hidden] {
+  display: none;
+}
+/* 붙잡힌 상자는 글을 고를 수 있다. 마우스를 따라다니는 동안에는 아래 글자를
+   가로막지 않도록 그대로 통과시킨다. */
+.note-tip.is-pinned {
+  pointer-events: auto;
+  user-select: text;
+}
+/* 각주와 출처가 한 목록에 선다. 목록이 둘이면 위첨자 하나를 보고 어느
+   목록을 봐야 하는지 읽는 쪽이 먼저 정해야 한다. */
+.notes {
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  margin-top: 65px;
+  padding-top: 10px;
+}
+.prose .notes-title {
+  font:
+    12px Arial,
+    sans-serif;
+  margin: 0 0 0.6em;
+}
+/* 들여쓰기는 <ul>이 아니라 <li>가 진다. 목록이 지면 항목 상자는 글 오른쪽에
+   서고, 내어쓴 첫 줄과 번호는 상자 밖에 남아 :target 배경이 그 자리를 덮지
+   못한다. 상자가 지면 안쪽 여백으로 들어오므로 한 줄도 새지 않는다. */
+.notes ol,
+.notes .bib-list {
+  font-size: 14px;
+  line-height: 1.7;
+  padding-left: 0;
+}
+.notes li {
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+}
+/* 번호도 상자 안에 들어와야 함께 칠해진다. */
+.notes ol {
+  list-style-position: inside;
+}
+/* 참고문헌은 번호가 아니라 저자 순으로 선다(APA). 점도 번호도 세우지 않고,
+   둘째 줄부터 들여써서 항목이 어디서 시작하는지가 눈에 남는다. */
+.notes .bib-list {
+  list-style: none;
+}
+/* 항목 전체가 링크다. 줄마다 밑줄이 깔리면 목록이 아니라 밑줄 더미가 되므로
+   가리켰을 때만 긋는다. 본문 인용과 같은 규칙이다. */
+.prose .bib-link {
+  text-decoration: none;
+}
+.prose .bib-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* 두 목록이 잇달아 서면 위 테두리는 첫 목록의 것 하나로 넉넉하다. */
+.notes + .notes {
+  border-top: 0;
+  margin-top: 2.4em;
+  padding-top: 0;
+}
+.notes li {
+  margin: 0.5em 0;
+}
+/* 주소는 길어 줄을 넘긴다. 본문의 긴 URL과 같은 처리다. */
+.notes a {
+  overflow-wrap: break-word;
+}
+/* 번호를 눌러 목록으로 뛰면 어느 항목에 내려앉았는지 표시가 없어 눈이
+   다시 찾아야 한다. ↩로 돌아올 때도 같다. 주소가 가리키는 쪽에만 걸린다. */
+.notes li:target,
+.footnote-ref a:target {
+  background: var(--bg-mark);
+}
+.not-found {
+  padding: 100px 0;
+}
+.loading {
+  padding: 60px 0;
+}
+@media (max-width: 680px) {
+  .paper {
+    width: min(100% - 30px, 1040px);
+  }
+  /* 320px에서도 한 줄에 들어가도록 이름과 단추를 함께 줄인다. 그래도 모자라면
+     위의 flex-wrap이 받아 준다. */
+  .site-head {
+    min-height: 75px;
+    padding: 10px 0;
+  }
+  .site-head > span {
+    display: none;
+  }
+  .wordmark {
+    font-size: 19px;
+  }
+  .site-head nav {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .site-head .search-open,
+  .site-head .theme-toggle {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  .intro {
+    padding: 68px 0 55px;
+  }
+  .post-card {
+    display: block;
+    padding: var(--space-5) 0;
+  }
+  .post-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .post-meta span {
+    display: inline;
+  }
+  .post-card > p {
+    margin: 10px 0 15px;
+  }
+  .article {
+    margin-top: var(--space-6);
+  }
+  .article-head {
+    padding: 38px 0 25px;
+  }
+  .prose {
+    font-size: 15px;
+  }
+}
+
+.site-head nav {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+}
+.site-head nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.site-head nav a:hover {
+  color: var(--accent);
+}
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+  font:
+    11px Arial,
+    sans-serif;
+  padding: 3px 7px;
+}
+[data-theme="dark"] .theme-toggle .to-dark,
+[data-theme="light"] .theme-toggle .to-light {
+  display: none;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: var(--space-6) 0;
+}
+
+.theme-toggle:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.post-meta a {
+  display: block;
+  color: var(--accent);
+  text-decoration: none;
+}
+.article-head .eyebrow a {
+  color: inherit;
+  text-decoration: none;
+}
+.categories {
+  border-top: 1px solid var(--line);
+  margin-top: 60px;
+  padding-top: var(--space-5);
+}
+.categories > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.categories a {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font: 11px var(--mono);
+  padding: 7px 10px;
+  text-decoration: none;
+}
+.categories a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.categories a span {
+  color: var(--muted);
+}
+/* 세 칩 목록(분류·시리즈·연도)은 같은 규칙을 쓴다. 첫 줄만 위 여백이 크고,
+   뒤따르는 것들은 서로 붙어 한 묶음으로 읽힌다. */
+.categories + .categories {
+  margin-top: var(--space-5);
+}
+.categories p {
+  font:
+    12px Arial,
+    sans-serif;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-3);
+  text-transform: uppercase;
+}
+
+/* ─── 쪽 넘김 ────────────────────────────────────────────────────────────
+   홈 한 쪽에 스무 편까지 서고, 넘치는 만큼이 뒷쪽으로 간다. 양 끝은 링크가
+   없을 때도 자리를 지킨다 — 쪽마다 가운데 숫자가 움직이면 어디까지 왔는지
+   읽는 쪽이 매번 다시 찾아야 한다. */
+.pager {
+  align-items: baseline;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+}
+.pager p {
+  color: var(--muted);
+  font:
+    11px Arial,
+    sans-serif;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+/* 갈 곳이 없는 쪽. 흐리게 두고 밑줄을 지워, 눌러 볼 것이 아님을 모양이
+   먼저 말한다. */
+.pager-end {
+  color: var(--line);
+  font:
+    11px Arial,
+    sans-serif;
+  white-space: nowrap;
+}
+
+/* ─── 시리즈 ──────────────────────────────────────────────────────────────
+   여러 편으로 나눈 글. 글 머리의 띠는 몇 편 중 몇 편인지 말하고 목차로
+   보낸다 — 중간부터 읽기 시작한 사람에게 필요한 것은 앞 글이 아니라 전체
+   구조다. */
+.series-banner {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  font:
+    12px Arial,
+    sans-serif;
+  letter-spacing: 0.04em;
+  margin: -14px 0 var(--space-5);
+  text-transform: uppercase;
+}
+.series-banner a {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.series-banner span {
+  color: var(--muted);
+}
+.series-list {
+  border-top: 1px solid var(--line);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.series-list li {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: var(--space-1) 20px;
+  grid-template-columns: 42px 1fr;
+  padding: 20px 0;
+}
+/* 편 번호는 목록이 매긴다. 원고의 part는 순서를 정하는 값이고, 읽는 쪽에
+   보이는 번호는 실제로 나온 편 수여야 한다. */
+.series-part {
+  color: var(--muted);
+  font:
+    13px Arial,
+    sans-serif;
+  grid-row: span 2;
+  padding-top: var(--space-1);
+}
+.series-list a {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 20px;
+  text-decoration: none;
+}
+.series-list a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.series-list p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ─── 이어 읽을 글 ────────────────────────────────────────────────────────
+   겹치는 것이 없으면 이 자리는 아예 나오지 않는다. 빈 칸을 채우려고 관계없는
+   글을 붙이면 한 번 읽어 본 사람이 다시 보지 않는다. */
+.related {
+  border-top: 1px solid var(--line);
+  margin-top: 56px;
+  padding-top: 22px;
+}
+.related > p {
+  font:
+    12px Arial,
+    sans-serif;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-3);
+  text-transform: uppercase;
+}
+.related ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.related li {
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  padding: 10px 0;
+}
+.related a {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  text-decoration: none;
+}
+.related a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.related li span {
+  color: var(--muted);
+  flex: none;
+  font-size: 13px;
+}
+
+.category-head {
+  padding: 75px 0 var(--space-7);
+}
+.category-head .eyebrow {
+  margin: 42px 0 var(--space-2);
+}
+.category-head h1 {
+  font-size: clamp(42px, 6vw, 70px);
+  letter-spacing: -0.06em;
+  line-height: 1.1;
+  margin: 0;
+}
+.category-head > p:last-child {
+  color: var(--muted);
+  font-size: 13px;
+}
+.code-block {
+  background: var(--bg-mark);
+  border: 1px solid var(--line);
+  margin: 2em 0;
+  overflow: hidden;
+}
+/* 툴바는 왼쪽에 언어, 오른쪽에 파일명과 Copy다. 언어는 이 블록이 무엇인지
+   말하는 라벨이라 작은 대문자로, 파일명은 이름이라 코드 글꼴로 둔다. */
+.prose .code-block > .code-toolbar,
+.code-toolbar {
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  display: flex;
+  font:
+    10px Arial,
+    sans-serif;
+  gap: var(--space-3);
+  justify-content: space-between;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  text-align: left;
+  text-transform: uppercase;
+}
+/* 언어는 사람이 부르는 이름("JavaScript")이라 대문자로 지르지 않는다. */
+.code-lang {
+  text-transform: none;
+}
+.code-tools {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 10px;
+  margin-left: auto;
+}
+/* 파일명은 라벨이 아니라 이름이고, 코드의 이름이므로 코드 글꼴로 둔다. */
+.code-file {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+/* 줄 번호는 코드 옆에 따로 선다. 한 요소 안에 섞어 넣으면 highlight.js가
+   내용을 갈아치울 때 함께 지워지고, 읽는 쪽이 블록을 끌어 복사하면 번호가
+   코드 사이에 끼어 붙는다. */
+.code-body {
+  display: flex;
+  align-items: stretch;
+}
+.code-scroll {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+.prose .code-gutter {
+  background: transparent;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  flex: none;
+  margin: 0;
+  overflow: hidden;
+  padding: var(--space-2) 10px var(--space-2) var(--space-4);
+  text-align: right;
+  user-select: none;
+}
+/* 강조와 diff는 코드 뒤에 깔린 띠다. 자리는 줄 단위로만 재므로 글꼴 크기가
+   바뀌어도 어긋나지 않는다 — --from은 줄 수, --span은 줄 개수다. */
+.code-layers {
+  inset: var(--space-2) 0;
+  pointer-events: none;
+  position: absolute;
+}
+.code-layers > span {
+  display: block;
+  font: 15px var(--mono);
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: calc(var(--from) * 1.6em);
+  height: calc(var(--span) * 1.6em);
+}
+.code-mark {
+  background: var(--bg-mark);
+}
+/* diff도 색을 쓰지 않는다. 더한 줄은 옅은 바탕에 왼쪽 두 줄, 지운 줄은
+   바탕 없이 왼쪽 한 줄이다. 흑백 인쇄에서도 두 종류가 남는다. */
+.code-add {
+  background: var(--bg-mark);
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+.code-del {
+  box-shadow: inset 1px 0 0 var(--ink);
+  opacity: 0.55;
+}
+.copy-code {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  padding: var(--space-1) 7px;
+  text-transform: uppercase;
+}
+.copy-code:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.prose .code-block pre {
+  background: var(--paper);
+  color: var(--ink);
+  margin: 0;
+}
+.prose .code-block .code-scroll > pre {
+  background: transparent;
+  position: relative;
+}
+.prose .code-block .code-body {
+  background: var(--paper);
+}
+.code-block pre code,
+.prose .code-block pre code.hljs {
+  background: transparent;
+  color: inherit;
+}
+
+/* 코드 블록에 다크 테마용 규칙이 따로 없다. 배색이 토큰 여섯 개 안으로
+   들어왔으므로 라이트·다크가 저절로 따라온다 — 예전에는 CDN의 github /
+   github-dark 테마와 맞물려야 해서 값을 직접 적어야 했다. */
+
+/* ─── 문법 강조 ───────────────────────────────────────────────────────────
+   강조는 빌드가 한다(bake.mjs). 배색은 이 종이의 규칙을 따라 색이 아니라
+   굵기·기울기·명도로 가른다. 층위는 넷뿐이다.
+
+     주석    옅은 잉크 + 기울임 — 코드가 아니라 코드에 대한 말이다
+     예약어  굵게 — 문장의 骨이다
+     문자열  기울임 — 코드 속의 글이다
+     이름    굵게 — 함수·형·절의 이름
+     나머지  본문 잉크 그대로
+
+   여기 없는 hljs 클래스는 본문 잉크로 나온다. 정의되지 않은 색이 새는
+   일이 없다. */
+.hljs-comment,
+.hljs-quote {
+  color: var(--muted);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-literal,
+.hljs-type,
+.hljs-tag .hljs-name {
+  font-weight: 700;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-symbol,
+.hljs-char,
+.hljs-subst {
+  font-style: italic;
+}
+.hljs-title,
+.hljs-section,
+.hljs-selector-id,
+.hljs-selector-class {
+  font-weight: 700;
+}
+.hljs-meta,
+.hljs-doctag,
+.hljs-attr,
+.hljs-attribute,
+.hljs-params,
+.hljs-number {
+  color: var(--muted);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+/* hljs가 자기 테마에서 쓰는 두 클래스. diff는 우리 띠(.code-add/.code-del)가
+   맡으므로 여기서는 명도만 준다. */
+.hljs-addition,
+.hljs-deletion {
+  color: var(--ink);
+}
+:root[data-theme="dark"] .prose .code-block .code-body {
+  background: var(--paper);
+}
+@media (max-width: 680px) {
+  .post-meta a {
+    display: inline;
+  }
+}
+
+/* ─── 건너뛰기 링크 ────────────────────────────────────────────────────────
+   탭 순서의 첫 자리. 초점을 받을 때만 종이 위로 올라온다. */
+.skip-link {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font: 13px var(--serif);
+  left: 12px;
+  padding: var(--space-2) var(--space-3);
+  position: fixed;
+  text-decoration: none;
+  top: -100px;
+  transition: top 0.12s;
+  z-index: 40;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ─── 절로 가는 링크 ──────────────────────────────────────────────────────
+   제목이 곧 제 절의 링크다. 별도의 기호를 달지 않으므로 조판은 그대로이고,
+   누르면 주소가 그 절을 가리킨다. 목차가 같은 절로 가는 링크를 이미 모두
+   들고 있으므로, 자바스크립트 없이 오는 독자에게도 길은 남아 있다. */
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  cursor: pointer;
+}
+/* 참고문헌 제목은 목차에도 없고 인용할 절도 아니다. */
+.prose .notes-title {
+  cursor: auto;
+}
+
+/* ─── 읽는 시간 ────────────────────────────────────────────────────────── */
+.post-meta .reading,
+.article-head .eyebrow {
+  color: var(--muted);
+}
+
+/* ─── 목차 ────────────────────────────────────────────────────────────────
+   좁은 창에서는 초록 아래 놓인 차례 그대로다. 글 안에 실려 오므로
+   자바스크립트가 없어도 링크 목록으로 동작한다. */
+.toc {
+  border-top: 1px solid var(--line);
+  margin: 0;
+  padding: var(--space-3) 0 18px;
+}
+/* 제목 줄이 곧 여닫는 손잡이다. details가 기본으로 그리는 삼각형은 이
+   조판에 없는 글자이므로 지우고, 펼친 상태는 +와 −로 말한다. */
+.toc-title {
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  font:
+    10px Arial,
+    sans-serif;
+  gap: 6px;
+  letter-spacing: 0.1em;
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  text-transform: uppercase;
+}
+.toc-title::-webkit-details-marker {
+  display: none;
+}
+.toc-title::after {
+  content: "+";
+}
+.toc-fold[open] > .toc-title::after {
+  content: "\2212";
+}
+.toc-title:hover {
+  color: var(--ink);
+}
+/* 접혀 있으면 제목 아래 여백만 남는다. */
+.toc-fold:not([open]) > .toc-title {
+  margin-bottom: 0;
+}
+/* 진행 자를 그리는 자리. 좁은 창에는 여백이 없으니 나오지 않는다. */
+.toc-rail {
+  display: none;
+}
+/* 자와 목록을 함께 담는 상자. 자의 높이는 이 상자를 따라가고, 이 상자는
+   목록만큼 자란다. */
+.toc-body {
+  position: relative;
+}
+.toc ol {
+  counter-reset: toc;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toc ol ol {
+  padding-left: var(--space-3);
+}
+.toc li {
+  counter-increment: toc;
+}
+.toc a {
+  color: var(--muted);
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1.55;
+  text-decoration: none;
+}
+.toc a::before {
+  content: counters(toc, ".") ". ";
+  color: var(--muted);
+}
+.toc a:hover {
+  color: var(--ink);
+}
+.toc a.is-current {
+  color: var(--ink);
+}
+
+/* ─── 넓은 창의 목차: 왼쪽 여백의 자 ──────────────────────────────────────
+   본문 칸은 720px에 고정되어 있으므로 그 왼쪽은 언제나 비어 있다. 같은
+   차례를 그 자리로 들어내 눈금만 남기고, 마우스나 초점이 닿을 때 글자가
+   왼쪽으로 펼쳐진다. 상자 폭이 고정이라 본문은 한 픽셀도 움직이지 않는다.
+   진행 정도는 위에 얹는 막대가 아니라 이 자의 먹이 차오르는 것으로 보인다. */
+@media (min-width: 1240px) {
+  .toc {
+    border: 0;
+    /* 창 왼쪽에 붙는다. 24 + 200 = 224px이 왼쪽 여백보다 좁아야 본문에
+       닿지 않으므로, 이 규칙은 창이 720 + 224 × 2 = 1168px보다 넓을 때부터
+       든다. 아래 경계값 1240px은 거기에 여유를 더 둔 값이다. */
+    left: 24px;
+    margin: 0;
+    max-height: 74vh;
+    /* 차례가 74vh보다 길면 자 안에서 넘긴다. 두루마리 손잡이는 이 여백에
+       그릴 만한 것이 아니라 감춘다. */
+    overflow-y: auto;
+    padding: 0;
+    position: fixed;
+    scrollbar-width: none;
+    text-align: left;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    z-index: 5;
+  }
+  .toc::-webkit-scrollbar {
+    display: none;
+  }
+  /* 여기서는 접을 것이 없다. 차례는 여백의 자 그 자체이므로 손잡이 구실을
+     거두고, 글자가 마우스에 따라 펼쳐지는 본래 동작만 남긴다. */
+  .toc-title {
+    cursor: default;
+    margin: 0 0 10px;
+    padding-left: 22px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s;
+  }
+  .toc-title::after,
+  .toc-fold[open] > .toc-title::after {
+    content: none;
+  }
+  /* 자는 상자의 오른쪽 끝, 본문 칸 바로 옆에 선다. */
+  .toc-rail {
+    background: var(--line);
+    bottom: 0;
+    display: block;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 1px;
+  }
+  .toc-progress {
+    background: var(--ink);
+    display: block;
+    height: 0;
+    width: 100%;
+  }
+  .toc-body > ol {
+    padding-left: 22px;
+  }
+  .toc ol ol {
+    padding: 0;
+  }
+  .toc li {
+    position: relative;
+  }
+  /* 눈금. 접힌 상태에서 보이는 것은 이것뿐이다. */
+  /* 아직 안 본 절. 자에 먹이 닿지 않은 만큼 옅다. */
+  .toc li::after {
+    background: var(--line);
+    content: "";
+    height: 1px;
+    left: -22px;
+    position: absolute;
+    /* 첫 줄의 가운데. 하위 절을 품은 li의 상자는 그 묶음 전체를 감싸므로
+       50%가 제 줄을 가리키지 않는다. */
+    top: 9px;
+    transition:
+      width 0.16s,
+      background 0.16s;
+    width: 9px;
+  }
+  .toc ol ol li::after {
+    width: 5px;
+  }
+  .toc a {
+    font-size: 12px;
+    /* 줄 높이를 픽셀로 못박아, 아래 눈금의 9px이 정확히 그 절반이 되게
+       한다. */
+    line-height: 18px;
+    max-width: 100%;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    text-overflow: ellipsis;
+    transition: opacity 0.16s;
+    white-space: nowrap;
+  }
+  .toc:hover .toc-title,
+  .toc:focus-within .toc-title,
+  .toc:hover a,
+  .toc:focus-within a {
+    opacity: 1;
+  }
+  .toc:hover a,
+  .toc:focus-within a {
+    pointer-events: auto;
+  }
+  /* 글자가 펼쳐지면 눈금은 물러난다. */
+  .toc:hover li::after,
+  .toc:focus-within li::after {
+    width: 0;
+  }
+  /* 지나온 절. */
+  .toc li:has(> a.is-read)::after {
+    background: var(--muted);
+  }
+  /* 접힌 자가 말하는 것은 눈금뿐이다. 읽고 있는 절의 눈금만 길고 진하다. */
+  .toc li:has(> a.is-current)::after {
+    background: var(--ink);
+    width: 16px;
+  }
+  /* 펼쳐지면 눈금은 모두 물러나고, 읽고 있는 절은 밑줄로 말한다. */
+  .toc:hover li:has(> a.is-current)::after,
+  .toc:focus-within li:has(> a.is-current)::after {
+    width: 0;
+  }
+  .toc:hover a.is-current,
+  .toc:focus-within a.is-current {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* ─── 이전 글 · 다음 글 ────────────────────────────────────────────────── */
+.post-nav {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 70px;
+  padding-top: 18px;
+}
+.post-nav a {
+  color: var(--ink);
+  display: block;
+  text-decoration: none;
+}
+.post-nav-next {
+  text-align: right;
+}
+.post-nav span {
+  color: var(--muted);
+  display: block;
+  font:
+    10px Arial,
+    sans-serif;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.post-nav strong {
+  font: 400 16px var(--serif);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.post-nav a:hover strong {
+  color: var(--muted);
+}
+/* 분류를 벗어나 이어지는 경우에만 붙는 줄. 분류 이름은 글쓴이가 정하므로
+   한글일 수 있어, 라벨 층의 Arial이 아니라 본문 글꼴을 쓴다. */
+.post-nav em {
+  color: var(--muted);
+  display: block;
+  font: 12px var(--serif);
+  font-style: normal;
+  margin-top: var(--space-1);
+}
+
+/* ─── 검색 ────────────────────────────────────────────────────────────────
+   머리글의 단추와, 그 단추가 여는 창. 목록은 app.js가 posts.json을 처음
+   열 때 한 번 받아서 채운다. */
+.search-open {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  cursor: pointer;
+  font:
+    11px Arial,
+    sans-serif;
+  padding: 3px 7px;
+}
+.search-open:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.search {
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  inset: 0;
+  padding: 12vh 20px 20px;
+  position: fixed;
+  z-index: 30;
+}
+.search[hidden] {
+  display: none;
+}
+.search-box {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  margin: auto;
+  max-width: 560px;
+  padding: 0;
+}
+.search-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font: 400 18px var(--serif);
+  outline: 0;
+  padding: var(--space-4) 18px;
+  width: 100%;
+}
+.search-results {
+  list-style: none;
+  margin: 0;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding: 0;
+}
+.search-results li {
+  border-bottom: 1px solid var(--line);
+}
+.search-results li:last-child {
+  border-bottom: 0;
+}
+.search-results a {
+  color: var(--ink);
+  display: block;
+  padding: 11px 18px;
+  text-decoration: none;
+}
+.search-results a strong {
+  display: block;
+  font: 400 15px var(--serif);
+  line-height: 1.35;
+}
+.search-results a small {
+  color: var(--muted);
+  display: block;
+  font:
+    11px Arial,
+    sans-serif;
+  margin-top: 3px;
+  /* 걸린 키워드가 붙는 줄이라 좁은 화면에서 쉽게 넘친다. 잘라 내면 왜
+     걸렸는지가 사라지므로 줄을 바꾼다. */
+  overflow-wrap: anywhere;
+}
+/* 찾은 자리. 제목은 400으로 짜여 있으므로 굵기만으로도 눈에 든다. */
+.search-results b {
+  color: var(--ink);
+  font-weight: 700;
+}
+/* 본문에서 걸린 글만 붙는 대목. 한 줄로 묶어 두면 좁은 화면에서 오른쪽이
+   잘려 나가고, 하필 굵게 칠한 자리가 거기 걸린다. 두 줄까지 접어 두고
+   넘치는 만큼만 덜어 낸다. */
+.search-snippet {
+  color: var(--muted);
+  display: -webkit-box;
+  font: 12px var(--serif);
+  line-height: 1.5;
+  margin-top: var(--space-1);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.search-results li[aria-selected="true"] a,
+.search-results a:hover {
+  background: var(--bg-mark);
+}
+.search-empty {
+  color: var(--muted);
+  font: 14px var(--serif);
+  padding: 14px 18px;
+}
+.search-hint {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font:
+    10px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  padding: var(--space-2) 18px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 680px) {
+  .post-nav {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-7);
+  }
+  .post-nav-next {
+    text-align: left;
+  }
+  .search {
+    padding: 8vh 14px 14px;
+  }
+  .heading-anchor {
+    display: none;
+  }
+}
+
+/* ─── 첫머리 글 ────────────────────────────────────────────────────────────
+   보존고를 여는 한 편만 크게 낸다. 저널이 표지를 한 편에 주는 것과 같고,
+   나머지 카드는 그대로다. */
+.post-card.is-lead {
+  padding: 30px 0 28px;
+}
+/* 초안 표시. 미리보기에만 서므로 조판을 흔들지 않는 자리에 작게 둔다 —
+   지금 보는 것이 나갈 글인지 아닌지만 알면 된다. */
+.draft-mark {
+  border: 1px solid var(--line);
+  font:
+    10px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+}
+.post-card.is-draft h2 a {
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+}
+.post-card.is-lead h2 {
+  font-size: 25px;
+  line-height: 1.24;
+}
+.post-card.is-lead > p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ─── 차트 자료표 ─────────────────────────────────────────────────────────
+   접혀 있고, 여는 손잡이는 표 설명과 같은 층의 글자다. */
+.chart-data-sheet {
+  margin: -1em 0 2em;
+}
+.chart-data-sheet > summary {
+  color: var(--muted);
+  cursor: pointer;
+  font:
+    11px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  list-style: none;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.chart-data-sheet > summary::-webkit-details-marker {
+  display: none;
+}
+.chart-data-sheet > summary::before {
+  content: "+ ";
+}
+.chart-data-sheet[open] > summary::before {
+  content: "− ";
+}
+.chart-data-sheet > summary:hover {
+  color: var(--ink);
+}
+.chart-data-sheet .table-wrap {
+  margin: 10px 0 0;
+}
+.chart-data-sheet .chart-data {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.chart-data-sheet .chart-data td {
+  border-bottom: 1px solid var(--line);
+  padding: 3px 10px 3px 0;
+}
+
+/* ─── 동작 줄이기 ─────────────────────────────────────────────────────────
+   독자가 운영체제에서 동작을 줄여 두었으면 옮겨지는 것을 옮기지 않는다.
+   보이고 안 보이는 결과는 그대로다. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── 인쇄 ────────────────────────────────────────────────────────────────
+   논문 조판이므로 인쇄물이 곧 배포본이다. 화면에서만 쓰는 것들, 즉 머리글의
+   길잡이·검색·테마 단추, 옆여백의 자, 글 끝의 다른 글 링크는 종이에서 할 일이
+   없다. 링크는 주소를 펼쳐 종이에서도 따라갈 수 있게 한다. */
+@media print {
+  .skip-link,
+  .site-head,
+  .toc,
+  .post-nav,
+  .search,
+  .search-open,
+  .theme-toggle,
+  .back,
+  .read,
+  footer {
+    display: none !important;
+  }
+  .paper {
+    width: auto;
+  }
+  .article {
+    margin-top: 0;
+  }
+  .article-head {
+    padding-top: 0;
+  }
+  /* 본문 링크의 주소를 괄호로 펼친다. 각주 번호와 절 안 링크는 이미
+     문서 안을 가리키므로 펼치지 않는다. */
+  .prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+  /* 그림·표·코드는 쪽을 넘어가며 갈리면 읽을 수 없게 된다. */
+  figure,
+  .table-wrap,
+  .code-block,
+  .chart-data-sheet,
+  .prose .callout,
+  .prose .environment,
+  .prose li.task,
+  .prose blockquote {
+    break-inside: avoid;
+  }
+  /* 사이드노트가 오른쪽 여백으로 30mm 나간다. 그 자리를 여기서 만들어
+     두지 않으면 브라우저 기본 여백(보통 12.7mm)에 걸려 종이 밖으로 잘린다 —
+     아래 규칙이 기대는 "넓은 여백"이 이것이다. */
+  @page {
+    margin: 16mm 36mm 16mm 18mm;
+  }
+  /* 사이드노트는 종이에서도 여백에 남는다. 하단 목록으로 내려가는 각주와
+     다른 점이다. */
+  .sidenote {
+    clear: right;
+    float: right;
+    margin: 0 -30mm 0.6em 0;
+    width: 26mm;
+  }
+  /* 강조 띠의 바탕은 잉크를 먹기만 한다. diff의 왼쪽 줄은 남긴다. */
+  .code-mark,
+  .code-add {
+    background: none;
+  }
+  /* 다이어그램 옆의 글은 종이에도 그림이 나가므로 두 번 읽을 것이 없다. */
+  .diagram-reading {
+    display: none;
+  }
+  /* 알림 상자의 바탕은 잉크를 먹기만 하고 종이에서는 구분에 보태는 것이
+     없다. 왼쪽 테두리만 남긴다. */
+  .prose .callout {
+    background: none;
+  }
+  /* 접힌 상자도 종이에는 펼쳐 나온다. 이름표는 제목이라 남긴다. */
+  .prose .callout-details > summary::before {
+    content: "";
+  }
+  .prose .callout-details::details-content {
+    content-visibility: visible !important;
+  }
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    break-after: avoid;
+    cursor: auto;
+  }
+  .table-wrap {
+    background: none;
+    overflow: visible;
+  }
+  /* 자료표는 접혀 있어도 종이에는 펼쳐 나온다. */
+  .chart-data-sheet > summary {
+    display: none;
+  }
+  .chart-data-sheet .table-wrap {
+    content-visibility: visible !important;
+    display: block !important;
+  }
+  /* 접힘을 감추는 것은 요즘 브라우저에서 이 몫이다. */
+  .chart-data-sheet::details-content {
+    content-visibility: visible !important;
+  }
+  .notes {
+    break-before: auto;
+  }
+}
+
+/* ─── 번호와 상호참조 ─────────────────────────────────────────────────────
+   그림·표·식·코드·정리의 번호는 렌더러가 매긴다. 캡션 앞에 서는 번호는
+   캡션과 같은 글이므로 따로 꾸미지 않고, 굵기 한 단계만 올려 캡션 본문과
+   구분한다. 상호참조는 문서 안을 가리키는 링크라 바깥 링크의 화살표가
+   붙지 않는다. */
+.caption-number {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.prose .xref {
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+/* 번호가 붙은 식. 식은 가운데, 번호는 오른쪽 끝이다 — 논문 조판의 자리다.
+   좁은 화면에서는 번호가 식 아래로 내려간다. */
+.prose .math-block {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+  margin: 1.4em 0;
+}
+.prose .math-block > .math-display {
+  flex: 1;
+  margin: 0;
+  min-width: 0;
+  overflow-x: auto;
+}
+.eq-number {
+  color: var(--ink);
+  flex: none;
+  font-family: var(--serif);
+  font-size: 15px;
+}
+.prose > .math-block + p {
+  text-indent: 0;
+}
+@media (max-width: 520px) {
+  .prose .math-block {
+    display: block;
+  }
+  .eq-number {
+    display: block;
+    text-align: right;
+  }
+}
+
+/* ─── 수학 환경 ───────────────────────────────────────────────────────────
+   정리·정의·증명. 알림 상자와 같은 기계를 쓰지만 두 가지가 다르다. 종류마다
+   번호를 따로 세고, 진술은 기울인 글씨, 증명은 곧은 글씨다. 색이 없는 이
+   종이에서 기울기는 종류를 가르는 몇 안 되는 층위 중 하나이고, 수학 조판의
+   관례이기도 하다. */
+.prose .environment {
+  border-left: 2px solid var(--ink);
+  margin: 1.8em 0;
+  padding: 0.1em 0 0.1em 1.2em;
+}
+/* 이름줄은 본문과 같은 글꼴·크기다. "정리 1"과 "(피타고라스)"는 글쓴이가
+   정하는 값이라 한글일 수 있고, 라벨 층이 아니라 그 진술을 부르는 이름이다.
+   크기를 물려받으므로 좁은 화면에서 본문이 줄면 함께 줄어든다. */
+.prose .environment-title {
+  font-family: var(--serif);
+  letter-spacing: 0;
+  margin: 0 0 0.4em;
+  text-indent: 0;
+  text-transform: none;
+}
+.environment-name {
+  font-weight: 600;
+}
+.environment-note {
+  color: var(--muted);
+  margin-left: 0.4em;
+}
+/* 진술은 기울인다. 증명은 곧은 글씨 그대로다. */
+.prose .environment-thm .environment-body,
+.prose .environment-lem .environment-body,
+.prose .environment-cor .environment-body,
+.prose .environment-prop .environment-body,
+.prose .environment-def .environment-body {
+  font-style: italic;
+}
+/* 기울임 안의 수식과 코드는 기울이지 않는다. 수식은 자기 조판을 지고 있고,
+   코드는 기울인 고정폭이 읽히지 않는다. */
+.prose .environment-body .math,
+.prose .environment-body code,
+.prose .environment-body pre {
+  font-style: normal;
+}
+.prose .environment-body > p {
+  text-indent: 0;
+}
+.prose .environment-body > p:first-child {
+  margin-top: 0;
+}
+.prose .environment-body > p:last-child {
+  margin-bottom: 0;
+}
+/* 증명 끝의 ∎. 본문 마지막 줄 오른쪽에 붙는다. */
+.qed {
+  float: right;
+  font-style: normal;
+  line-height: 1.8;
+}
+.prose > .environment + p {
+  text-indent: 0;
+}
+
+/* ─── 사이드노트 ──────────────────────────────────────────────────────────
+   각주는 글 아래로 내려가고 사이드노트는 그 줄 옆에 선다. 표시와 글이 본문
+   흐름에 나란히 놓여 있으므로, 넓은 화면에서는 글만 오른쪽 여백으로 띄우고
+   좁은 화면에서는 그 자리에 작은 덩이로 앉힌다. 어느 쪽이든 스크립트가
+   필요하지 않고, 읽을 글이 읽는 자리에 있다. */
+.sidenote-ref {
+  font:
+    11px Arial,
+    sans-serif;
+  vertical-align: super;
+}
+.sidenote {
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0.4em 0 0.8em 1.2em;
+  text-indent: 0;
+}
+.sidenote-mark {
+  font:
+    11px Arial,
+    sans-serif;
+  vertical-align: super;
+}
+/* 본문 칼럼 밖에 여백이 남는 너비에서만 여백으로 나간다. 그 아래에서는
+   위의 덩이 그대로다. */
+@media (min-width: 1180px) {
+  .sidenote {
+    clear: right;
+    float: right;
+    margin: 0 -13.5rem 0.6em 0;
+    width: 12rem;
+  }
+}
+
+/* ─── 수식 ────────────────────────────────────────────────────────────────
+   수식은 빌드에서 KaTeX가 그린다(bake.mjs). 읽는 쪽에서 다시 그릴 것이
+   없으므로 katex.min.js는 어느 페이지에도 붙지 않고, JavaScript가 꺼져
+   있어도 수식이 보인다. 글자 모양을 지는 글꼴만 dist/katex/에서 온다. */
+.prose .math-display {
+  margin: 1.4em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+.prose .math-inline {
+  /* 인라인 수식이 문단의 행간을 밀지 않게 한다. KaTeX의 상자는 글자보다
+     높고, 그 높이가 그대로 줄 높이가 되면 한 줄만 벌어진다. */
+  line-height: normal;
+}
+/* KaTeX가 읽지 못한 수식. 원본이 그대로 남으므로 무엇을 잘못 썼는지 보이고,
+   점선 밑줄이 그것이 조판되지 않았다는 표시다. 그래프가 읽히지 않을 때 코드
+   블록으로 떨어지는 것과 같은 규칙이다. */
+.prose .math-raw {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 3px;
+}
+
+/* ─── 인용 ────────────────────────────────────────────────────────────────
+   본문 인용은 괄호 안의 (저자, 연도)다. 번호를 쓰지 않는 것은 위첨자 숫자가
+   이 종이에서 이미 각주의 것이고, 둘이 한 목록을 나눠 쓰기 때문이다. */
+.prose .cite a {
+  text-decoration: none;
+}
+.prose .cite a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── 다이어그램 ──────────────────────────────────────────────────────────
+   그래프가 수를 그리듯 다이어그램은 구조를 그린다. 둘 다 빌드에서 그려지고,
+   색을 쓰지 않는다. 이웃한 화살은 색이 아니라 선 모양과 화살머리가 가른다. */
+.diagram {
+  margin: 2em 0;
+}
+.diagram-wrap {
+  overflow: auto;
+}
+.diagram-svg {
+  display: block;
+  font-family: inherit;
+  height: auto;
+  margin: 0 auto;
+  width: 100%;
+}
+.diagram-node-shape {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.diagram-node-text {
+  fill: var(--ink);
+  font-size: 14px;
+}
+.diagram-edge {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.diagram-head {
+  fill: var(--ink);
+  stroke: none;
+}
+.diagram-head-open {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+/* 생명선은 참가자 아래로 내려가는 점선이다. 메시지 화살보다 옅게 둬야 화살이
+   먼저 읽힌다. */
+.diagram-lifeline {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.diagram-note {
+  fill: var(--bg-mark);
+  stroke: var(--line);
+  stroke-width: 1;
+}
+/* 라벨 뒤의 종이. 선 위에 떨어진 라벨을 상자 없이 읽히게 하는 것이라
+   테두리를 두지 않는다. */
+.diagram-label-patch {
+  fill: var(--paper);
+  stroke: none;
+}
+.diagram-edge-text {
+  fill: var(--ink);
+  font-size: 12px;
+}
+.diagram-svg ::selection {
+  background: var(--ink);
+  color: var(--paper);
+  fill: var(--paper);
+}
+/* 그림을 볼 수 없는 쪽에 나가는 같은 내용의 글. 화면에서는 감추되 스크린
+   리더와 검색 색인에는 남는다. display:none이면 둘 다 읽지 못한다. */
+.diagram-reading {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+@media (max-width: 560px) {
+  .diagram-svg {
+    min-width: 420px;
+  }
+}
+
+/* 그래프. 색은 쓰지 않는다. 계열 구분은 선 모양·마커 모양·면 명도 세 채널이
+   맡고, 명도는 회색값이 아니라 --ink의 불투명도라 라이트/다크가 저절로
+   따라온다. 팔레트를 두 벌 관리할 일이 없다. */
+.chart {
+  margin: 2em 0;
+}
+.chart-wrap {
+  overflow: auto;
+}
+.chart-svg {
+  display: block;
+  width: 100%;
+  /* 이 아래로는 축소 대신 가로 스크롤. 뷰박스가 그대로 줄면 눈금 글자가
+     읽을 수 없는 크기까지 작아진다. 표가 넘칠 때와 같은 처리다. */
+  min-width: 480px;
+  height: auto;
+  /* 글자 폭은 빌드 때 추정한 값이라 몇 px 어긋날 수 있다. 그 오차가 떨어질
+     자리는 chart/frame.mjs의 EDGE가 뷰박스 안에 비워 두므로, 넘치는 것은
+     여백을 다 쓴 뒤뿐이고 그때는 잘리는 편이 낫다. overflow를 visible로 두면
+     Chrome이 그 삐져나온 만큼을 스크롤 영역으로 세어 .chart-wrap에 빈
+     가로 스크롤바가 생긴다. Firefox는 세지 않아 브라우저마다 달라진다. */
+  overflow: hidden;
+  font-family: inherit;
+}
+/* 위 캡션은 본문과 같은 글꼴·크기·색·행간이다. 표 캡션과 같은 규칙이다.
+   그림 캡션(.prose figcaption)이 12px 회색 가운데 정렬이고 구체성도 더
+   높으므로, .prose를 붙여 같은 무게로 다시 쓴다. */
+.prose .chart-caption {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0 0 var(--space-2);
+  text-align: left;
+  text-indent: 0;
+}
+.chart-caption .caption-row {
+  align-items: baseline;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+.chart-caption .caption-text {
+  color: var(--ink);
+}
+.chart-caption .caption-aside {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* 마크가 축·격자보다 위에 오도록 그리는 순서만 잡아 둔다. */
+.chart-plot {
+  isolation: isolate;
+}
+
+/* 축·눈금·격자 */
+.chart-grid-line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart-axis-line,
+.chart-tick {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+/* 도형 안의 글자도 본문 잉크다. 회색 눈금은 도형만 인쇄물에서 떠 보이게
+   한다. 크기는 본문(16px)에서 한 단계 내린 표 주석과 같은 14px이고,
+   여백을 재는 chart/index.mjs의 FONT와 같은 값이어야 한다. */
+.chart-tick-label,
+.chart-legend-label {
+  fill: var(--ink);
+  font-size: 14px;
+}
+.chart-axis-name {
+  fill: var(--ink);
+  font-size: 14px;
+}
+/* 그림 속 글자를 끌어도 본문처럼 반전되게 한다. SVG 글자는 color가 아니라
+   fill로 칠해지므로, 위 규칙의 fill이 선택 색을 그대로 이긴다. Chrome과
+   Safari는 ::selection의 fill을 읽고 Firefox는 color를 읽으므로 둘 다 적는다.
+   값은 본문의 전역 ::selection과 같은 잉크와 종이라, 그림이 따로 놀지 않는다. */
+.chart-svg ::selection {
+  background: var(--ink);
+  color: var(--paper);
+  fill: var(--paper);
+}
+
+/* 자료 */
+.chart-series {
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+.chart-line,
+.chart-stem {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+.chart-marker {
+  fill: var(--ink);
+  stroke: none;
+}
+.chart-marker-stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+/* 가리키면 나오는 값. 스크립트가 없으므로 말풍선은 빌드 때 미리 그려 두고
+   CSS가 보이기만 합니다. 손가락에는 hover가 없으니 숨은 자료표가 그대로
+   남고, 이 층은 있으면 좋은 것에 그칩니다. */
+.chart-hover {
+  pointer-events: none;
+}
+.chart-hit {
+  fill: transparent;
+  pointer-events: all;
+}
+.chart-tip {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+.chart-hit:hover + .chart-tip {
+  opacity: 1;
+}
+.chart-tip-box {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.chart-tip-line {
+  fill: var(--ink);
+  font-size: 13px;
+}
+
+/* 한 점에서 두 축으로 내린 수선. 자료가 아니라 주석이므로 격자선보다는
+   또렷하고 계열선보다는 옅다. */
+.chart-guide {
+  fill: none;
+  opacity: 0.55;
+  stroke: var(--ink);
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+.chart-point-label {
+  fill: var(--ink);
+  font-size: 14px;
+}
+.chart-area {
+  stroke: none;
+}
+.chart-area-edge {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+.chart-error,
+.chart-whisker {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.chart-bar,
+.chart-box,
+.chart-violin {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.chart-median {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.chart-hatch {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+/* 채널 1: 선 모양 여섯 가지 */
+.dash-1 {
+  stroke-dasharray: none;
+}
+.dash-2 {
+  stroke-dasharray: 6 3;
+}
+.dash-3 {
+  stroke-dasharray: 1.5 3;
+}
+.dash-4 {
+  stroke-dasharray: 6 3 1.5 3;
+}
+.dash-5 {
+  stroke-dasharray: 10 4;
+}
+.dash-6 {
+  stroke-dasharray: 6 3 1.5 3 1.5 3;
+}
+
+/* 채널 3: 면 명도 여섯 단계. 잉크의 불투명도라 두 테마 모두에서 맞는다. */
+.shade-1 {
+  fill: var(--ink);
+  opacity: 1;
+}
+.shade-2 {
+  fill: var(--ink);
+  opacity: 0.72;
+}
+.shade-3 {
+  fill: var(--ink);
+  opacity: 0.5;
+}
+.shade-4 {
+  fill: var(--ink);
+  opacity: 0.34;
+}
+.shade-5 {
+  fill: var(--ink);
+  opacity: 0.22;
+}
+.shade-6 {
+  fill: var(--ink);
+  opacity: 0.13;
+}
+
+/* 스크린 리더에만 나가는 자료표. 눈으로 볼 일이 없으니 테두리도 없다. */
+.chart-data {
+  border-collapse: collapse;
+}
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
