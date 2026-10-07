@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 격자. 눈금만 남긴 그림이다. 색은 color 한 곳에만 두고 도형은
+       currentColor를 따라가므로, 밝은 탭과 어두운 탭이 한 줄로 뒤집힌다.
+       좌표는 모두 32단위 격자 위의 정수라 16px에서 획이 반 픽셀에 걸리지 않는다. -->
+  <style>
+    :root { color-scheme: light dark; color: #111111 }
+    @media (prefers-color-scheme: dark) { :root { color: #f5f5f5 } }
+    rect { fill: currentColor }
+  </style>
+  <rect x="11" y="4" width="2.2" height="24"/>
+  <rect x="19" y="4" width="2.2" height="24"/>
+  <rect x="4" y="11" width="24" height="2.2"/>
+  <rect x="4" y="19" width="24" height="2.2"/>
+</svg>
