@@ -1,0 +1,11 @@
+.git
+.gitignore
+.dockerignore
+node_modules
+dist
+test
+README.md
+Dockerfile
+# 글꼴 원본과 쪼개는 스크립트는 배포에 쓰이지 않는다. fonts/에 놓인
+# 결과물만 빌드가 읽는다.
+tools

@@ -1,0 +1,107 @@
+shxin-blog
+Copyright 2026 신성은진
+
+This product includes software developed by 신성은진.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+================================================================================
+THIRD-PARTY FONTS
+================================================================================
+
+The Apache License above covers this project's own source code. It does NOT
+cover the font files in fonts/. Each font keeps its own license, listed below.
+Anyone redistributing this repository is responsible for honouring them.
+
+--------------------------------------------------------------------------------
+CMU Serif — fonts/cmu-*.woff2
+--------------------------------------------------------------------------------
+The Unicode build of Computer Modern. Latin text is set in this.
+
+  Source:  https://www.ctan.org/tex-archive/fonts/cm-unicode
+  License: SIL Open Font License 1.1 — fonts/cmu-OFL.txt
+
+The files here are WOFF2 subsets built from the upstream OTFs by
+tools/serif-font.sh. The OFL permits subsetting and redistribution.
+
+--------------------------------------------------------------------------------
+Geist Mono — fonts/geist-mono.woff2
+--------------------------------------------------------------------------------
+Code is set in this. Copyright (c) 2023 Vercel, in collaboration with
+basement.studio.
+
+  Source:  https://github.com/vercel/geist-font
+  License: SIL Open Font License 1.1 — fonts/geist-OFL.txt
+
+Subset by tools/code-fonts.sh.
+
+--------------------------------------------------------------------------------
+Pretendard — fonts/pretendard-code.woff2
+--------------------------------------------------------------------------------
+Hangul inside code blocks, where Geist Mono has no glyph.
+Copyright (c) 2021 Kil Hyung-jin, with Reserved Font Name Pretendard.
+
+  Source:  https://github.com/orioncactus/pretendard
+  License: SIL Open Font License 1.1 — fonts/pretendard-OFL.txt
+
+Subset by tools/code-fonts.sh. Note the OFL's Reserved Font Name clause: a
+modified version may not be distributed under the name "Pretendard".
+
+--------------------------------------------------------------------------------
+조선신명조 (Chosun Shinmyeongjo) — fonts/sm-base.woff2, fonts/sm-han.woff2
+--------------------------------------------------------------------------------
+Hangul, Kana, Han and arrows are set in this.
+
+  Source:  distributed by 조선일보 (The Chosun Ilbo)
+  License: NOT INCLUDED — see the warning below
+
+These two files are WOFF2 subsets produced by tools/split-font.sh from a
+Chosun Ilbo font. No license text accompanies them in this repository, and
+the upstream terms have not been verified by the authors.
+
+  WARNING: Chosun Ilbo's font terms generally permit free use but place
+  conditions on redistribution and modification. These files are both
+  redistributed and modified (subset). If you fork, vendor or redeploy this
+  repository, check the current terms at the publisher before shipping these
+  two files, and remove them if the terms do not allow it.
+
+Removing them degrades gracefully rather than breaking: the --serif stack in
+style.css falls back through "신명조", "조선신명조", "바탕", "Batang" to the
+reader's system serif.
+
+--------------------------------------------------------------------------------
+Tinos — not shipped
+--------------------------------------------------------------------------------
+Earlier versions set Latin text in Tinos (Apache License 2.0, Steve Matteson).
+It was replaced by CMU Serif and is no longer referenced by style.css.
+
+
+================================================================================
+THIRD-PARTY SOFTWARE
+================================================================================
+
+Build-time dependencies, each under its own license. None are vendored here;
+npm fetches them. See each package for its full terms.
+
+  katex          0.18.7   MIT            math, baked into the html at build time
+  highlight.js   11.12.0  BSD-3-Clause   syntax highlighting, baked in at build
+
+Optional, loaded only if present (site/webp.mjs). A build without it ships the
+same pages, minus the WebP twins:
+
+  sharp          0.35.4   Apache-2.0     WebP twins for raster images
+
+Development only, and the source of two of the fonts above:
+
+  geist, pretendard, nodemon

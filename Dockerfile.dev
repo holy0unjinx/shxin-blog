@@ -1,0 +1,10 @@
+FROM node:24-alpine
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci && mkdir -p /app/dist && chown node:node /app/dist
+
+ENV HOST=0.0.0.0 PORT=8003
+EXPOSE 8003
+USER node
+CMD ["npm", "run", "dev"]
