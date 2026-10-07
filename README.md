@@ -1,4 +1,4 @@
-# shxin.blog
+# [shxin.blog](https://shxin.blog)
 
 정적 블로그. `posts/`의 Markdown 파일을 읽어 라우트별 HTML을 완성된 형태로 생성하고, `dist/`를 그대로 서빙합니다. 브라우저는 이미 렌더링된 페이지를 받으므로 JavaScript가 꺼져 있어도 글을 읽을 수 있습니다 — 수식과 문법 강조까지 포함해서입니다.
 
@@ -379,6 +379,6 @@ CMU Serif는 Computer Modern의 유니코드판이며 SIL Open Font License로 �
 `fonts/`의 글꼴 파일은 **이 라이선스가 덮지 않습니다.** 글꼴마다 제 라이선스를 그대로 지니며, 출처와 조건은 `NOTICE`에 정리해 두었습니다.
 
 - CMU Serif·Geist Mono·Pretendard는 SIL Open Font License 1.1이고, 라이선스 전문을 `fonts/`에 함께 둡니다.
-- **조선신명조(`sm-base.woff2`, `sm-han.woff2`)는 라이선스 전문이 없습니다.** 조선일보 배포 글꼴을 `tools/split-font.sh`로 서브셋한 결과물이라, 재배포·변형 조건을 저장소가 보증하지 못합니다. 포크하거나 다시 배포할 때는 배포처의 현재 조건을 확인하고, 허용되지 않으면 두 파일을 지우십시오. 지워도 `--serif` 스택이 시스템 바탕으로 물려받으므로 페이지는 깨지지 않습니다.
+- **조선신명조(`sm-base.woff2`, `sm-han.woff2`)는 조선일보 전용서체 이용 조건을 따르며 OFL이 아닙니다.** 개인·기업에 무료로 제공되고 자유로운 배포를 허용하지만, 복사·배포의 대가 요구와 수정 후 판매를 금지하며 배포된 형태 그대로 사용하도록 명시합니다. 제공받은 라이선스 본문은 [fonts/chosun-LICENSE.txt](fonts/chosun-LICENSE.txt)에 보관합니다. 현재 파일은 `tools/split-font.sh`로 만든 WOFF2 서브셋이므로, 이 가공 형태의 허용 여부가 확인된 것으로 표기하지 않습니다.
 
 `posts/`와 `draft/`의 글은 저장소에 담지 않습니다(`.gitignore`). 코드만 공개하고 글은 각자의 기계에 둡니다.
