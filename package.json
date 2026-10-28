@@ -11,7 +11,7 @@
     "build": "node site/build.mjs",
     "serve": "node site/server.mjs",
     "start": "npm run build && node site/server.mjs",
-    "dev": "DEV=1 nodemon --watch posts --watch draft --watch render --watch site --watch fonts --watch assets --watch data --watch app.js --watch style.css --watch editor.js --watch editor.css --watch index.html --watch refs.bib --ext md,mjs,js,css,html,bib,csv --exec \"npm start\"",
+    "dev": "DEV=1 nodemon --signal SIGTERM --delay 1 --watch posts --watch draft --watch render --watch site --watch fonts --watch assets --watch data --watch app.js --watch style.css --watch editor.js --watch editor.css --watch index.html --watch refs.bib --ext md,mjs,js,css,html,bib,csv --exec \"npm start\"",
     "test": "node --test",
     "lint": "LINT_EXIT=1 node site/build.mjs"
   },
