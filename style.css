@@ -527,6 +527,28 @@ footer {
   font-weight: 400;
   text-indent: 1em;
 }
+/* 제목과 초록도 한글 어절을 중간에서 끊지 않는다. 긴 로마자·주소만 접는다. */
+.article h1,
+.not-found h1,
+.category-head h1,
+.post-card h2,
+.post-card > p,
+.deck .abstract,
+.keywords,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6,
+.series-banner a,
+.series-list a,
+.series-list p,
+.post-nav strong,
+.related a,
+.search-results a strong {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
 /* 초록 아래 키워드 줄. 형태는 초록과 같고 크기만 한 단계 작다. */
 .keywords {
   color: var(--ink);

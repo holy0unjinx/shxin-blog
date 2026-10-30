@@ -183,6 +183,18 @@ test("사이드노트가 나갈 여백이 종이에 실제로 있다", () => {
 });
 
 
+test("제목과 초록은 한글 어절을 중간에서 끊지 않는다", () => {
+  // 본문 문단만 keep-all이면 큰 제목과 초록에서 한글이 글자 단위로 갈린다.
+  const from = css.indexOf("/* 제목과 초록도 한글 어절을 중간에서 끊지 않는다.");
+  assert.ok(from !== -1, "제목·초록 keep-all 규칙이 없다");
+  const open = css.indexOf("{", from);
+  const block = css.slice(from, css.indexOf("}", open) + 1);
+  for (const sel of [".article h1", ".deck .abstract", ".post-card h2", ".post-card > p"])
+    assert.ok(block.includes(sel), `${sel}이 빠져 있다`);
+  assert.match(block, /word-break:\s*keep-all/);
+  assert.match(block, /overflow-wrap:\s*break-word/);
+});
+
 test("둥근 모서리가 없다", () => {
   // 장식보다 정밀함이 먼저다. 버튼도 카드도 인풋도 코드 칩도 각지게 둔다.
   const rounded = [
