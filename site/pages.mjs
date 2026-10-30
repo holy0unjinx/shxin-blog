@@ -152,17 +152,78 @@ export function yearPage(year, posts) {
   );
 }
 
+// 빈 꼬리표. 여는 꼬리표가 하나로 끝나는 것들이라, 깊이를 세는 쪽에서
+// 짝을 기다리면 그 뒤의 모든 블록이 한 덩이로 붙는다.
+const VOID_TAGS = new Set([
+  "area", "base", "br", "col", "embed", "hr", "img", "input",
+  "link", "meta", "param", "source", "track", "wbr",
+]);
+
+// 꼬리표, 또는 주석 한 덩이.
+const MARKUP = /<!--[\s\S]*?-->|<\/([a-zA-Z][\w-]*)\s*>|<([a-zA-Z][\w-]*)\b[^>]*?(\/?)>/g;
+
+/**
+ * 본문을 최상위 블록으로 가른다.
+ *
+ * 머리글을 접는 자리를 고르는 데 쓴다. 높이로 자르면 줄 하나가 반으로
+ * 잘리고 글꼴과 창 폭마다 자리가 달라지므로, 자르는 자리는 블록의 경계여야
+ * 한다. 깊이를 세는 것으로 족하다 — 안에 무엇이 들었는지는 묻지 않으므로
+ * svg도 코드 블록도 제 덩이 하나로 남는다.
+ */
+export function topLevelBlocks(html) {
+  const source = String(html);
+  const blocks = [];
+  let depth = 0;
+  let start = 0;
+  const cut = (end) => {
+    blocks.push(source.slice(start, end));
+    start = end;
+  };
+  MARKUP.lastIndex = 0;
+  for (let found; (found = MARKUP.exec(source)); ) {
+    const [whole, closing, opening, slash] = found;
+    const end = found.index + whole.length;
+    if (closing) {
+      // 짝이 맞지 않는 닫는 꼬리표는 깊이를 음수로 끌고 가 그다음 블록까지
+      // 집어삼킨다. 0에서 멈춰 세운다.
+      if (depth > 0 && --depth === 0) cut(end);
+    } else if (opening) {
+      if (slash === "/" || VOID_TAGS.has(opening.toLowerCase())) {
+        if (depth === 0) cut(end);
+      } else depth += 1;
+    }
+  }
+  // 닫히지 않은 꼬리가 남으면 한 덩이로 둔다. 잃는 것보다 낫다.
+  if (start < source.length) cut(source.length);
+  return blocks.filter((block) => block.trim());
+}
+
 // 분류·시리즈 머리의 README. GitHub 프로필이 README.md를 저장소 목록 위에
 // 펼쳐 두듯, 이 묶음이 무엇인지 말하는 글을 목록보다 먼저 세운다. 머리줄은
 // 코드 블록의 툴바를 따른다 — 파일 하나를 통째로 보여 주는 자리라는 점에서
 // 둘은 같은 것이다.
+//
+// 목록보다 먼저 서는 글이므로 길면 목록을 화면 밖으로 밀어낸다. 앞머리의
+// fold가 정한 덩이까지만 펼쳐 두고 나머지는 접는다. 접는 일은 details가
+// 지므로 스크립트가 꺼져 있어도 펼쳐진다.
 function readmeBox(readme, owner) {
   if (!readme) return "";
-  return (
-    `<section class="readme" aria-label="README">` +
+  const bar =
     `<p class="readme-bar"><span class="readme-path">${esc(owner)} / <strong>README</strong>.md</span>` +
-    `${readme.draft ? '<span class="draft-mark">초안</span>' : ""}</p>` +
-    `<div class="prose">${readme.html}</div></section>`
+    `${readme.draft ? '<span class="draft-mark">초안</span>' : ""}</p>`;
+  const open = (html) => `<div class="prose">${html}</div>`;
+  const box = (body) =>
+    `<section class="readme" aria-label="README">${bar}` +
+    `<div class="readme-body">${body}</div></section>`;
+  const limit = readme.fold ?? Infinity;
+  const blocks = topLevelBlocks(readme.html);
+  // 접을 것이 한 덩이뿐이면 접지 않는다. 손잡이가 그 한 덩이보다 크다.
+  if (blocks.length <= limit + 1) return box(open(readme.html));
+  return box(
+    open(blocks.slice(0, limit).join("")) +
+      `<details class="readme-more"><summary>` +
+      `<span class="more-open">더 보기</span><span class="more-close">접기</span>` +
+      `</summary>${open(blocks.slice(limit).join(""))}</details>`,
   );
 }
 

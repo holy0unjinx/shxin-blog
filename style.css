@@ -1473,14 +1473,60 @@ footer {
   font-size: 13px;
   letter-spacing: 0;
 }
-.readme > .prose {
+.readme-body {
   padding: var(--space-5) clamp(var(--space-4), 4vw, var(--space-6));
 }
-.readme > .prose > :first-child {
+/* 접힌 뒷부분은 제 .prose를 따로 쓴다. 한 .prose 안에 details를 두면 그
+   안의 문단이 `.prose > p`의 들여쓰기와 줄 간격을 받지 못한다. */
+.readme .prose {
+  padding-top: 0;
+}
+.readme .prose > :first-child {
   margin-top: 0;
 }
-.readme > .prose > :last-child {
+.readme .prose > :last-child {
   margin-bottom: 0;
+}
+/* 더 보기. 손잡이는 접히는 알림 상자와 같은 글자이고 여는 표시도 같은
+   +/− 한 쌍이다. 접힌 자리를 선 하나로 알린다 — 머리글이 여기서 끊겼다는
+   것은 목록으로 내려가기 전에 보여야 하는 사실이다. */
+.readme-more {
+  border-top: 1px solid var(--line);
+  margin-top: var(--space-4);
+}
+.readme-more > summary {
+  color: var(--ink);
+  cursor: pointer;
+  font:
+    700 12px Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+  list-style: none;
+  padding: 0.8em 0 0;
+  text-transform: uppercase;
+}
+.readme-more > summary::-webkit-details-marker {
+  display: none;
+}
+.readme-more > summary::before {
+  content: "+ ";
+}
+.readme-more[open] > summary::before {
+  content: "− ";
+}
+/* 라벨 한 쌍. 테마 토글과 같은 수로, 어느 쪽을 숨기는지는 CSS가 안다. */
+.readme-more > summary .more-close,
+.readme-more[open] > summary .more-open {
+  display: none;
+}
+.readme-more[open] > summary .more-close {
+  display: inline;
+}
+.readme-more > summary:hover {
+  color: var(--muted);
+}
+.readme-more > .prose {
+  padding-top: var(--space-4);
 }
 .code-block {
   background: var(--bg-mark);

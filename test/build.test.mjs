@@ -91,17 +91,47 @@ const a = 1;
 `;
 
 // infra 분류의 README. 목록의 글이 아니라 분류 페이지 머리에 펼쳐지는 글이다.
+// 덩이가 기본값(4)보다 많아 뒷부분이 접힌다.
 const infraReadme = `---
 title: "infra README"
 date: 2026-07-30
 category: infra
 slug: infra-readme
 readme: true
+fold: 2
 ---
 
 # 인프라 노트
 
 이 분류는 **인증서**와 서버를 다룬다.
+
+접힌 쪽의 첫 문단.
+
+접힌 쪽의 둘째 문단.
+`;
+
+// 접지 않는 머리글. 덩이가 많아도 통째로 펼쳐진다. none 분류는 머리글 없이
+// 두어, 이 기능이 없는 쪽이 예전 그대로인 것도 함께 말한다.
+const notesReadme = `---
+title: "notes README"
+date: 2026-07-30
+category: notes
+slug: notes-readme
+readme: category
+fold: none
+---
+
+첫 덩이.
+
+둘째 덩이.
+
+셋째 덩이.
+
+넷째 덩이.
+
+다섯째 덩이.
+
+여섯째 덩이.
 `;
 
 before(() => {
@@ -110,6 +140,7 @@ before(() => {
   writeFileSync(join(postsDir, "before-ca.md"), olderInSameCategory);
   writeFileSync(join(postsDir, "with-code.md"), withCodeAndMath);
   writeFileSync(join(postsDir, "infra-readme.md"), infraReadme);
+  writeFileSync(join(postsDir, "notes-readme.md"), notesReadme);
   const build = spawnSync(process.execPath, ["site/build.mjs"], {
     cwd: root,
     encoding: "utf8",
@@ -386,6 +417,32 @@ test("분류 README는 글 목록보다 먼저, 파일 이름을 단 상자로 �
   assert.match(html, /<strong>인증서<\/strong>/);
   // README가 없는 분류는 예전 그대로다.
   assert.doesNotMatch(read("category/none/index.html"), /class="readme"/);
+});
+
+test("긴 README는 fold가 정한 덩이까지만 펼쳐지고 나머지는 접힌다", () => {
+  const html = read("category/infra/index.html");
+  const fold = html.indexOf('<details class="readme-more">');
+  assert.ok(fold > 0, "더 보기 손잡이가 없다");
+  // fold: 2 — 제목과 첫 문단까지가 펼쳐진 쪽이다.
+  const open = html.slice(html.indexOf('<div class="readme-body">'), fold);
+  assert.match(open, /인프라 노트/);
+  assert.match(open, /<strong>인증서<\/strong>/);
+  assert.doesNotMatch(open, /접힌 쪽의/);
+  // 접힌 쪽은 사라지지 않는다 — 스크립트 없이도 펼칠 수 있어야 한다.
+  const rest = html.slice(fold, html.indexOf("</details>"));
+  assert.match(rest, /접힌 쪽의 첫 문단/);
+  assert.match(rest, /접힌 쪽의 둘째 문단/);
+  // 손잡이의 라벨 한 쌍. 어느 쪽을 숨기는지는 CSS가 안다.
+  assert.match(html, /<span class="more-open">더 보기<\/span><span class="more-close">접기<\/span>/);
+  // 목록은 접힌 상자 뒤에 그대로 선다.
+  assert.ok(html.indexOf('<section class="post-list">') > fold);
+});
+
+test("fold: none은 접지 않는다", () => {
+  const html = read("category/notes/index.html");
+  assert.match(html, /class="readme"/);
+  assert.doesNotMatch(html, /readme-more/);
+  for (const text of ["첫 덩이", "여섯째 덩이"]) assert.match(html, new RegExp(text));
 });
 
 test("README는 목록의 글이 아니다", () => {

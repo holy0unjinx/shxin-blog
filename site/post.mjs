@@ -48,6 +48,9 @@ export function postFrom({ data = {}, body = "", slug, draft = false }) {
     // 분류나 시리즈의 README. 목록에 서는 글이 아니라 그 목록 맨 위에 펼쳐지는
     // 글이다 — GitHub 프로필이 README.md를 저장소 목록 위에 두듯이.
     readme: readmeTarget(data.readme),
+    // 머리글을 몇 덩이까지 펼쳐 둘지. 목록보다 먼저 서는 글이므로 길면
+    // 목록을 화면 밖으로 밀어낸다.
+    fold: foldAt(data.fold),
     body,
   };
 }
@@ -59,4 +62,19 @@ export function readmeTarget(value) {
   if (word === "series") return "series";
   if (word === "category" || word === "true") return "category";
   return "";
+}
+
+// 머리글이 펼쳐 둘 덩이 수. 세는 것은 픽셀이 아니라 최상위 블록이다 —
+// 높이로 자르면 줄 하나가 반으로 잘리고, 글꼴과 창 폭마다 자리가 달라진다.
+// "fold: none"은 접지 않고 다 보여 준다.
+export const FOLD_DEFAULT = 4;
+
+export function foldAt(value, fallback = FOLD_DEFAULT) {
+  const word = String(value ?? "").trim().toLowerCase();
+  if (!word) return fallback;
+  // 접지 않는 쪽을 고르는 말들. 0도 여기다 — "0덩이만 보여 준다"는 뜻으로
+  // 읽으면 머리글이 통째로 숨고, 그것을 원해서 적는 사람은 없다.
+  if (["none", "no", "false", "off", "all", "0"].includes(word)) return Infinity;
+  const count = Number.parseInt(word, 10);
+  return count > 0 ? count : fallback;
 }

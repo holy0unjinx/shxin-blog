@@ -8,8 +8,15 @@ import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
 import { after, before, test } from "node:test";
 
-import { PAGE_SIZE, homePage, pageCount, pagePath, yearOf } from "../site/pages.mjs";
-import { readmeTarget } from "../site/post.mjs";
+import {
+  PAGE_SIZE,
+  homePage,
+  pageCount,
+  pagePath,
+  topLevelBlocks,
+  yearOf,
+} from "../site/pages.mjs";
+import { FOLD_DEFAULT, foldAt, readmeTarget } from "../site/post.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const dist = mkdtempSync(join(tmpdir(), "shxin-pages-"));
@@ -133,6 +140,8 @@ test("시리즈 README는 목차 위에 서고, 겨루면 새것이 선다", () 
   assert.match(html, /사설 CA 세우기 \/ <strong>README<\/strong>\.md/);
   assert.match(html, /CA를 세운다/);
   assert.doesNotMatch(html, /밀려난 머리글/);
+  // 한 덩이뿐인 머리글은 접지 않는다 — 손잡이가 그 한 덩이보다 크다.
+  assert.doesNotMatch(html, /readme-more/);
   // 수식은 구워져 들어가고, 그 글자 모양을 위한 스타일시트가 붙는다.
   assert.match(html, /class="katex"/);
   assert.match(html, /<link rel="stylesheet" href="\/katex\.[0-9a-f]{8}\.css">/);
@@ -140,6 +149,59 @@ test("시리즈 README는 목차 위에 서고, 겨루면 새것이 선다", () 
   assert.match(html, /<p>3편<\/p>/);
   assert.doesNotMatch(read("category/infra/index.html"), /ca-readme|class="readme"/);
   assert.equal(exists("ca-readme/index.html"), false);
+});
+
+test("본문은 최상위 블록으로 갈린다 — 안에 무엇이 들었는지는 묻지 않는다", () => {
+  assert.deepEqual(topLevelBlocks("<p>하나</p><p>둘</p>"), [
+    "<p>하나</p>",
+    "<p>둘</p>",
+  ]);
+  // 같은 이름이 겹쳐도 짝을 센다.
+  assert.deepEqual(
+    topLevelBlocks('<div class="a"><div>안</div></div><p>밖</p>'),
+    ['<div class="a"><div>안</div></div>', "<p>밖</p>"],
+  );
+  // 빈 꼬리표는 짝을 기다리지 않는다.
+  assert.deepEqual(topLevelBlocks('<hr><img src="x.png"><p>셋</p>'), [
+    "<hr>",
+    '<img src="x.png">',
+    "<p>셋</p>",
+  ]);
+  assert.deepEqual(topLevelBlocks("<hr /><p>넷</p>"), ["<hr />", "<p>넷</p>"]);
+  // svg 한 장은 제 덩이 하나다.
+  assert.equal(
+    topLevelBlocks('<figure><svg><g><path d="M0 0"/></g></svg></figure>').length,
+    1,
+  );
+  assert.deepEqual(topLevelBlocks(""), []);
+  // 짝이 맞지 않는 닫는 꼬리표는 바로 뒤 블록에 붙고 거기서 멈춘다. 깊이가
+  // 음수로 흐르면 그 뒤의 모든 블록이 한 덩이가 되는데, 그러지 않는다.
+  assert.deepEqual(topLevelBlocks("</p><p>하나</p><p>둘</p>"), [
+    "</p><p>하나</p>",
+    "<p>둘</p>",
+  ]);
+  // 어느 입력에서도 이어 붙이면 원본이다 — 접는 자리를 고르다 글을 잃지
+  // 않는다는 것이 이 함수의 전부다.
+  for (const html of [
+    "<p>하나</p><p>둘</p>",
+    "<hr><p>셋</p>",
+    "</p><p>넷</p>",
+    "<div><p>닫히지 않은",
+    "글자만",
+  ])
+    assert.equal(topLevelBlocks(html).join(""), html, html);
+});
+
+test("fold 값은 펼쳐 둘 덩이 수를 정하고, 접지 않는 쪽도 고를 수 있다", () => {
+  assert.equal(foldAt(undefined), FOLD_DEFAULT);
+  assert.equal(foldAt(""), FOLD_DEFAULT);
+  assert.equal(foldAt("2"), 2);
+  assert.equal(foldAt(" 7 "), 7);
+  for (const word of ["none", "no", "false", "off", "all", "0"])
+    assert.equal(foldAt(word), Infinity, word);
+  // 읽을 수 없는 값은 기본값으로 물러난다 — 머리글이 통째로 숨는 것보다 낫다.
+  assert.equal(foldAt("-3"), FOLD_DEFAULT);
+  assert.equal(foldAt("가나다"), FOLD_DEFAULT);
 });
 
 test("앞머리의 readme 값은 어느 페이지에 설지를 정한다", () => {

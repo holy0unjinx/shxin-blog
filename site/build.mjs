@@ -452,6 +452,7 @@ for (const post of readmes) {
     slug: post.slug,
     draft: post.draft,
     math: baked.math,
+    fold: post.fold,
     html: withPictureSources(baked.html, twins),
   });
 }
