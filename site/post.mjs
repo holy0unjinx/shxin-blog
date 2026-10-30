@@ -45,6 +45,18 @@ export function postFrom({ data = {}, body = "", slug, draft = false }) {
     series: data.series || "",
     seriesSlug: data.series ? data.seriesSlug || slugify(data.series) : "",
     part: Number.parseInt(data.part ?? "", 10) || 0,
+    // 분류나 시리즈의 README. 목록에 서는 글이 아니라 그 목록 맨 위에 펼쳐지는
+    // 글이다 — GitHub 프로필이 README.md를 저장소 목록 위에 두듯이.
+    readme: readmeTarget(data.readme),
     body,
   };
+}
+
+// "readme: series"는 시리즈 페이지, "readme: category"나 "readme: true"는
+// 분류 페이지의 머리에 선다. 그 밖의 값은 보통 글이다.
+export function readmeTarget(value) {
+  const word = String(value ?? "").trim().toLowerCase();
+  if (word === "series") return "series";
+  if (word === "category" || word === "true") return "category";
+  return "";
 }

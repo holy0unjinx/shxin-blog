@@ -292,12 +292,17 @@ for (const { dir, draft } of sources)
     files.push({ dir, file, draft });
 
 const posts = [];
+// 분류·시리즈의 README. 목록의 글이 아니므로 여기서 떼어 둔다 — 그러면 홈,
+// 피드, 검색, sitemap, 이웃 글 어디에도 저절로 끼지 않는다.
+const readmes = [];
 for (const { dir, file, draft } of files) {
   const source = await readFile(join(dir, file), "utf8");
   const { data, body } = frontmatter(source);
-  posts.push(postFrom({ data, body, slug: basename(file, ".md"), draft }));
+  const post = postFrom({ data, body, slug: basename(file, ".md"), draft });
+  (post.readme ? readmes : posts).push(post);
 }
 posts.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+readmes.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
 // Bodies are rendered once and shared by the page and the feed.
 const rendered = new Map();
@@ -418,11 +423,48 @@ for (const post of posts) {
   articles.push({ post, document: { ...document, html }, baked });
 }
 
+// README는 따로 서는 페이지가 없고 분류·시리즈 페이지 머리에 들어간다.
+// 한 자리에 둘이 겨루면 새것이 서고, 옛것은 알린 뒤 뺀다.
+const readmeHtml = new Map();
+for (const post of readmes) {
+  const owner =
+    post.readme === "series" ? post.seriesSlug : post.categorySlug;
+  if (!owner) {
+    console.warn(`${post.slug}: readme: series인데 series가 없다 — 건너뛴다`);
+    continue;
+  }
+  const key = `${post.readme}:${owner}`;
+  if (readmeHtml.has(key)) {
+    console.warn(
+      `${post.slug}: ${key}의 README는 이미 ${readmeHtml.get(key).slug}이다 — 건너뛴다`,
+    );
+    continue;
+  }
+  const document = renderDocument(post.body, {
+    resolve: readText,
+    measure: measureImage,
+    bib: readBib(post.bib),
+  });
+  const baked = await bake(document.html);
+  for (const failure of baked.failed)
+    console.warn(`${post.slug}: 수식을 읽지 못했다 — ${failure.reason}`);
+  readmeHtml.set(key, {
+    slug: post.slug,
+    draft: post.draft,
+    math: baked.math,
+    html: withPictureSources(baked.html, twins),
+  });
+}
+
 // 수식이 있는 글이 하나도 없으면 KaTeX는 나가지 않는다. 다만 미리보기에는
 // 편집기가 서 있고 거기서는 언제든 수식을 칠 수 있으므로, DEV에서는 늘
 // 내보낸다.
 const katexStyle =
-  DEV || articles.some(({ baked }) => baked.math) ? await copyKatex() : "";
+  DEV ||
+  articles.some(({ baked }) => baked.math) ||
+  [...readmeHtml.values()].some((readme) => readme.math)
+    ? await copyKatex()
+    : "";
 
 for (const [index, { post, document, baked }] of articles.entries()) {
   await write(`/${post.slug}/`, page({
@@ -473,24 +515,37 @@ for (const [keywordSlug, { name, posts: list }] of keywords)
 const categories = new Map(posts.map((post) => [post.categorySlug, post.category]));
 for (const [categorySlug, name] of categories) {
   const list = posts.filter((post) => post.categorySlug === categorySlug);
+  const readme = readmeHtml.get(`category:${categorySlug}`);
   await write(`/category/${categorySlug}/`, page({
     path: `/category/${encodeURIComponent(categorySlug)}/`,
     title: name,
     description: `${name} 카테고리의 글 ${list.length}개.`,
-    content: categoryPage(name, list, categorySlug),
+    content: categoryPage(name, list, categorySlug, readme),
+    assets: { math: Boolean(readme?.math), katexStyle },
   }));
 }
 
 // 시리즈 목차. 편이 하나뿐인 시리즈에도 페이지를 낸다 — 이어질 글을
 // 예고하며 쓰기 시작하는 것이 보통이고, 두 번째 편이 나오는 날 주소가
 // 생기는 것은 늦다.
-for (const [seriesSlug, list] of seriesOrder)
+for (const [seriesSlug, list] of seriesOrder) {
+  const readme = readmeHtml.get(`series:${seriesSlug}`);
   await write(`/series/${seriesSlug}/`, page({
     path: `/series/${encodeURIComponent(seriesSlug)}/`,
     title: list[0].series,
     description: `${list[0].series} 시리즈의 글 ${list.length}편.`,
-    content: seriesPage(list[0].series, list),
+    content: seriesPage(list[0].series, list, readme),
+    assets: { math: Boolean(readme?.math), katexStyle },
   }));
+}
+
+// 글이 하나도 없는 분류·시리즈에는 페이지가 없으므로, 그 README는 설 곳이
+// 없다. 조용히 사라지면 글쓴이는 이름을 잘못 적은 줄 모른다.
+for (const [key, { slug }] of readmeHtml) {
+  const [kind, owner] = key.split(":");
+  const home = kind === "series" ? seriesOrder.has(owner) : categories.has(owner);
+  if (!home) console.warn(`${slug}: ${key}에 글이 없어 README가 설 페이지가 없다`);
+}
 
 // 연도별 목록. 글 slug가 네 자리 수와 같으면 그 주소는 이미 글의 것이므로
 // 그 해는 홈의 Years 칩에서 빠진 채 글 목록 안에만 남는다.

@@ -90,11 +90,26 @@ const a = 1;
 \`\`\`
 `;
 
+// infra 분류의 README. 목록의 글이 아니라 분류 페이지 머리에 펼쳐지는 글이다.
+const infraReadme = `---
+title: "infra README"
+date: 2026-07-30
+category: infra
+slug: infra-readme
+readme: true
+---
+
+# 인프라 노트
+
+이 분류는 **인증서**와 서버를 다룬다.
+`;
+
 before(() => {
   writeFileSync(join(postsDir, "private-ca.md"), withKeywords);
   writeFileSync(join(postsDir, "first-post.md"), withoutKeywords);
   writeFileSync(join(postsDir, "before-ca.md"), olderInSameCategory);
   writeFileSync(join(postsDir, "with-code.md"), withCodeAndMath);
+  writeFileSync(join(postsDir, "infra-readme.md"), infraReadme);
   const build = spawnSync(process.execPath, ["site/build.mjs"], {
     cwd: root,
     encoding: "utf8",
@@ -358,6 +373,35 @@ test("posts.json is metadata only", () => {
     posts.find((post) => post.slug === "first-post").keywords,
     [],
   );
+});
+
+test("분류 README는 글 목록보다 먼저, 파일 이름을 단 상자로 선다", () => {
+  const html = read("category/infra/index.html");
+  const box = html.indexOf('<section class="readme"');
+  assert.ok(box > 0, "README 상자가 없다");
+  assert.ok(box < html.indexOf('<section class="post-list">'), "README가 목록 뒤에 섰다");
+  assert.match(html, /<span class="readme-path">infra \/ <strong>README<\/strong>\.md<\/span>/);
+  // 원고의 #은 한 단계 내려 선다 — 페이지의 h1은 분류 이름이다.
+  assert.match(html, /<h2 id="[^"]*">인프라 노트<\/h2>/);
+  assert.match(html, /<strong>인증서<\/strong>/);
+  // README가 없는 분류는 예전 그대로다.
+  assert.doesNotMatch(read("category/none/index.html"), /class="readme"/);
+});
+
+test("README는 목록의 글이 아니다", () => {
+  assert.equal(existsSync(join(dist, "infra-readme", "index.html")), false);
+  assert.equal(
+    JSON.parse(read("posts.json")).some((post) => post.slug === "infra-readme"),
+    false,
+  );
+  for (const path of ["index.html", "rss.xml", "sitemap.xml", "category/infra/index.html"])
+    assert.doesNotMatch(
+      read(path).replace(/<section class="readme"[\s\S]*?<\/section>/, ""),
+      /infra-readme|인프라 노트/,
+      path,
+    );
+  // 분류의 글 수에도 들지 않는다.
+  assert.match(read("category/infra/index.html"), /<p>2개의 글<\/p>/);
 });
 
 test("posts are ordered newest first", () => {

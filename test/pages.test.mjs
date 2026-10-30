@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { after, before, test } from "node:test";
 
 import { PAGE_SIZE, homePage, pageCount, pagePath, yearOf } from "../site/pages.mjs";
+import { readmeTarget } from "../site/post.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const dist = mkdtempSync(join(tmpdir(), "shxin-pages-"));
@@ -75,6 +76,28 @@ before(() => {
     join(postsDir, "other.md"),
     post({ slug: "other", title: "다른 분야", date: "2024-02-02", category: "math" }),
   );
+  // 시리즈의 README 둘. 한 자리에 둘이 겨루면 새것이 선다. 새것은 수식을
+  // 지고 있어, 시리즈 페이지가 KaTeX 스타일시트를 받아야 한다.
+  writeFileSync(
+    join(postsDir, "ca-readme.md"),
+    post({
+      slug: "ca-readme",
+      title: "시리즈 머리글",
+      date: "2026-02-01",
+      extra: 'series: "사설 CA 세우기"\nreadme: series\n',
+      body: "세 편에 걸쳐 $x^2$만큼 CA를 세운다.",
+    }),
+  );
+  writeFileSync(
+    join(postsDir, "ca-readme-old.md"),
+    post({
+      slug: "ca-readme-old",
+      title: "옛 머리글",
+      date: "2025-01-01",
+      extra: 'series: "사설 CA 세우기"\nreadme: series\n',
+      body: "밀려난 머리글.",
+    }),
+  );
   const build = spawnSync(process.execPath, ["site/build.mjs"], {
     cwd: root,
     encoding: "utf8",
@@ -100,6 +123,33 @@ test("a series gets its own contents page, in part order", () => {
   assert.match(html, /<p>3편<\/p>/);
   const order = [...html.matchAll(/href="\/(ca-\d)\//g)].map((m) => m[1]);
   assert.deepEqual(order, ["ca-1", "ca-2", "ca-3"]);
+});
+
+test("시리즈 README는 목차 위에 서고, 겨루면 새것이 선다", () => {
+  const html = read("series/사설-ca-세우기/index.html");
+  const box = html.indexOf('<section class="readme"');
+  assert.ok(box > 0, "README 상자가 없다");
+  assert.ok(box < html.indexOf('<ol class="series-list">'));
+  assert.match(html, /사설 CA 세우기 \/ <strong>README<\/strong>\.md/);
+  assert.match(html, /CA를 세운다/);
+  assert.doesNotMatch(html, /밀려난 머리글/);
+  // 수식은 구워져 들어가고, 그 글자 모양을 위한 스타일시트가 붙는다.
+  assert.match(html, /class="katex"/);
+  assert.match(html, /<link rel="stylesheet" href="\/katex\.[0-9a-f]{8}\.css">/);
+  // 편 수에도, 같은 분류의 목록에도 끼지 않는다.
+  assert.match(html, /<p>3편<\/p>/);
+  assert.doesNotMatch(read("category/infra/index.html"), /ca-readme|class="readme"/);
+  assert.equal(exists("ca-readme/index.html"), false);
+});
+
+test("앞머리의 readme 값은 어느 페이지에 설지를 정한다", () => {
+  assert.equal(readmeTarget("series"), "series");
+  assert.equal(readmeTarget("category"), "category");
+  assert.equal(readmeTarget("true"), "category");
+  assert.equal(readmeTarget(" Series "), "series");
+  assert.equal(readmeTarget(""), "");
+  assert.equal(readmeTarget(undefined), "");
+  assert.equal(readmeTarget("false"), "");
 });
 
 test("the printed part number counts the parts that exist", () => {

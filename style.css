@@ -1442,6 +1442,46 @@ footer {
   color: var(--muted);
   font-size: 13px;
 }
+
+/* ─── README ─────────────────────────────────────────────────────────────
+   분류·시리즈 머리에 펼쳐지는 글. 상자와 머리줄은 코드 블록과 같은 결이다 —
+   파일 하나를 통째로 보여 주는 자리라는 점에서 둘은 같은 것이다. 바탕은
+   칠하지 않는다. 안의 것은 코드가 아니라 본문이다. */
+.readme {
+  border: 1px solid var(--line);
+  margin: 0 0 var(--space-7);
+}
+.readme-bar {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  display: flex;
+  font:
+    10px Arial,
+    sans-serif;
+  gap: var(--space-3);
+  justify-content: space-between;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+}
+/* GitHub가 "holy0unjinx / README.md"라고 적는 자리. 경로는 이름이므로 코드
+   글꼴로 두고, 파일 이름만 굵게 세운다. */
+.readme-path {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.readme > .prose {
+  padding: var(--space-5) clamp(var(--space-4), 4vw, var(--space-6));
+}
+.readme > .prose > :first-child {
+  margin-top: 0;
+}
+.readme > .prose > :last-child {
+  margin-bottom: 0;
+}
 .code-block {
   background: var(--bg-mark);
   border: 1px solid var(--line);

@@ -152,14 +152,29 @@ export function yearPage(year, posts) {
   );
 }
 
+// 분류·시리즈 머리의 README. GitHub 프로필이 README.md를 저장소 목록 위에
+// 펼쳐 두듯, 이 묶음이 무엇인지 말하는 글을 목록보다 먼저 세운다. 머리줄은
+// 코드 블록의 툴바를 따른다 — 파일 하나를 통째로 보여 주는 자리라는 점에서
+// 둘은 같은 것이다.
+function readmeBox(readme, owner) {
+  if (!readme) return "";
+  return (
+    `<section class="readme" aria-label="README">` +
+    `<p class="readme-bar"><span class="readme-path">${esc(owner)} / <strong>README</strong>.md</span>` +
+    `${readme.draft ? '<span class="draft-mark">초안</span>' : ""}</p>` +
+    `<div class="prose">${readme.html}</div></section>`
+  );
+}
+
 /**
  * 시리즈 목차. 편 번호가 있으면 그 순서, 없으면 날짜순이다.
  */
-export function seriesPage(name, posts) {
+export function seriesPage(name, posts, readme = null) {
   return (
     `<section class="category-head"><a class="back" href="/">← Archive</a>` +
     `<p class="eyebrow">Series</p><h1>${esc(name)}</h1>` +
     `<p>${posts.length}편</p></section>` +
+    readmeBox(readme, name) +
     `<ol class="series-list">${posts
       .map(
         (post, index) =>
@@ -286,8 +301,8 @@ export function keywordPage(name, posts) {
   );
 }
 
-export function categoryPage(name, posts, categorySlug = "") {
-  return `<section class="category-head"><a class="back" href="/">← Archive</a><p class="eyebrow">Category</p><h1>${esc(name)}</h1><p>${posts.length}개의 글</p></section><section class="post-list">${postCards(posts, { currentCategory: categorySlug })}</section>`;
+export function categoryPage(name, posts, categorySlug = "", readme = null) {
+  return `<section class="category-head"><a class="back" href="/">← Archive</a><p class="eyebrow">Category</p><h1>${esc(name)}</h1><p>${posts.length}개의 글</p></section>${readmeBox(readme, name)}<section class="post-list">${postCards(posts, { currentCategory: categorySlug })}</section>`;
 }
 
 export function notFoundPage() {
