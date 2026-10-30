@@ -141,11 +141,14 @@ main.paper:has(.write) footer {
   font-size: 13px;
   line-height: 1.7;
   /* 원고는 글자 그대로 보여야 한다. 문법이 공백에 기대는 자리가 많다 —
-     펜스 안의 들여쓰기, 표의 정렬, 줄 끝 공백 둘. */
+     펜스 안의 들여쓰기, 표의 정렬, 줄 끝 공백 둘. pre-wrap은 그 공백을 다
+     지키면서 칸을 넘는 줄만 아래로 접는다. 가로로 밀어 읽는 원고는 문단
+     하나를 눈으로 따라가지 못한다. 띄어쓰기 없는 긴 주소도 칸 안에서 끊는다. */
   tab-size: 2;
-  white-space: pre;
-  overflow-wrap: normal;
-  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .write-text:focus-visible,
 .write-slug:focus-visible {
