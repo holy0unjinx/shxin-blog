@@ -221,9 +221,9 @@ function readmeBox(readme, owner) {
   if (blocks.length <= limit + 1) return box(open(readme.html));
   return box(
     open(blocks.slice(0, limit).join("")) +
-      `<details class="readme-more"><summary>` +
+      `<details class="readme-more"><summary><span class="readme-more-label">` +
       `<span class="more-open">더 보기</span><span class="more-close">접기</span>` +
-      `</summary>${open(blocks.slice(limit).join(""))}</details>`,
+      `</span></summary>${open(blocks.slice(limit).join(""))}</details>`,
   );
 }
 

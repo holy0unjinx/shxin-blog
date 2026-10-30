@@ -1487,31 +1487,44 @@ footer {
 .readme .prose > :last-child {
   margin-bottom: 0;
 }
-/* 더 보기. 손잡이는 접히는 알림 상자와 같은 글자이고 여는 표시도 같은
-   +/− 한 쌍이다. 접힌 자리를 선 하나로 알린다 — 머리글이 여기서 끊겼다는
-   것은 목록으로 내려가기 전에 보여야 하는 사실이다. */
+/* 더 보기. 접힌 내용을 여는 손잡이를 본문 가운데에 둔다. */
 .readme-more {
-  border-top: 1px solid var(--line);
   margin-top: var(--space-4);
 }
 .readme-more > summary {
-  color: var(--ink);
+  align-items: center;
+  /* 손잡이는 글이 아니라 장치다. 평소에는 물러나 있고 커서가 얹힐 때 글과
+     같은 잉크가 된다. */
+  color: var(--muted);
   cursor: pointer;
+  display: flex;
   font:
     700 12px Arial,
     sans-serif;
+  gap: var(--space-3);
   letter-spacing: 0.06em;
   list-style: none;
-  padding: 0.8em 0 0;
   text-transform: uppercase;
 }
 .readme-more > summary::-webkit-details-marker {
   display: none;
 }
-.readme-more > summary::before {
+.readme-more > summary::before,
+.readme-more > summary::after {
+  border-top: 1px dashed var(--line);
+  content: "";
+  flex: 1;
+}
+/* 테두리는 절취선과 같은 색이다. 둘이 한 줄에 서므로 색이 갈리면 선이
+   끊겨 보인다. */
+.readme-more-label {
+  border: 1px solid var(--line);
+  padding: 0.4em 0.8em;
+}
+.readme-more-label::before {
   content: "+ ";
 }
-.readme-more[open] > summary::before {
+.readme-more[open] .readme-more-label::before {
   content: "− ";
 }
 /* 라벨 한 쌍. 테마 토글과 같은 수로, 어느 쪽을 숨기는지는 CSS가 안다. */
@@ -1523,7 +1536,11 @@ footer {
   display: inline;
 }
 .readme-more > summary:hover {
-  color: var(--muted);
+  color: var(--ink);
+}
+.readme-more > summary:focus-visible .readme-more-label {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 .readme-more > .prose {
   padding-top: var(--space-4);
@@ -2273,6 +2290,29 @@ footer {
   }
   .article-head {
     padding-top: 0;
+  }
+  /* README가 있는 목록 페이지는 소개 글 한 편만 인쇄한다. */
+  #content:has(> .readme) > :not(.readme),
+  .readme-bar,
+  .readme-more > summary {
+    display: none !important;
+  }
+  .readme {
+    border: 0;
+    margin: 0;
+  }
+  .readme-body {
+    padding: 0;
+  }
+  .readme-more {
+    margin: 0;
+  }
+  .readme-more > .prose {
+    display: block !important;
+    padding-top: 0;
+  }
+  .readme-more::details-content {
+    content-visibility: visible !important;
   }
   /* 본문 링크의 주소를 괄호로 펼친다. 각주 번호와 절 안 링크는 이미
      문서 안을 가리키므로 펼치지 않는다. */
