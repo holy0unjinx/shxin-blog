@@ -59,6 +59,13 @@ const CODECS = [
   },
 ];
 
+// The local editor can be previewed inside ANA. Keep production pages closed
+// to framing, and allow only the ANA origins used by this development setup.
+const DEV = process.env.DEV === "1";
+const FRAME_ANCESTORS = DEV
+  ? "'self' http://localhost:3005 http://127.0.0.1:3005 http://192.168.0.33:3005"
+  : "'none'";
+
 const CSP = [
   "default-src 'self'",
   // The theme bootstrap is inline so it can run before first paint, and KaTeX
@@ -73,14 +80,16 @@ const CSP = [
   "object-src 'none'",
   "base-uri 'none'",
   "form-action 'none'",
-  "frame-ancestors 'none'",
+  `frame-ancestors ${FRAME_ANCESTORS}`,
 ].join("; ");
 
 const SECURITY_HEADERS = {
   "Content-Security-Policy": CSP,
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
+  // X-Frame-Options cannot express a list of origins. CSP frame-ancestors
+  // applies in current browsers; DENY remains for the production server.
+  ...(DEV ? {} : { "X-Frame-Options": "DENY" }),
   "Cross-Origin-Opener-Policy": "same-origin",
 };
 
@@ -107,8 +116,6 @@ function resolveFile(url) {
 // place, so the usual hour-long cache is what makes an edit look like it never
 // happened until the reader hard-reloads. Revalidation still runs, so an
 // unchanged file is one 304 rather than a fresh download.
-const DEV = process.env.DEV === "1";
-
 // 쓰기 경로가 붙는 순간, 같은 망의 다른 기계가 이 저장소의 draft/에 파일을
 // 쓸 수 있게 된다. 그래서 dev에서는 이 기계 안으로 좁힌다. 휴대폰으로
 // 미리보기를 보려면 HOST=0.0.0.0으로 되돌리면 된다 — 고르는 일이어야 한다.

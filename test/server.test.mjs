@@ -93,7 +93,19 @@ test("serves the home page with security headers", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+  assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.match(await response.text(), /<header class="site-head">/);
+});
+
+test("development preview can be framed by ANA", async () => {
+  const response = await fetch(devBase + "/");
+  assert.equal(response.status, 200);
+  assert.match(
+    response.headers.get("content-security-policy"),
+    /frame-ancestors 'self' http:\/\/localhost:3005 http:\/\/127\.0\.0\.1:3005 http:\/\/192\.168\.0\.33:3005/,
+  );
+  assert.equal(response.headers.get("x-frame-options"), null);
 });
 
 test("directory routes resolve to their index.html", async () => {
