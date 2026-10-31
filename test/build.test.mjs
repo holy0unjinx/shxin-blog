@@ -485,6 +485,7 @@ test("본문과 앞머리에 그림이 있어도 생성한 카드만 공유한�
   assert.match(html, /<meta name="twitter:image" content="https:\/\/example\.test\/og\/with-photo\.png">/);
   assert.match(html, /src="\/assets\/sample\.png"/);
   assert.ok(existsSync(join(dist, "og", "with-photo.png")));
+  assert.equal(existsSync(join(dist, "og", "with-photo.svg")), false);
 });
 
 test("그림이 없는 글은 그려 둔 카드를 쓴다", () => {

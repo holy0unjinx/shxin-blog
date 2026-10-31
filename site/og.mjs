@@ -1,9 +1,7 @@
 // The card a link to this blog shows when it is shared.
 //
-// It is drawn as SVG, in the same typography as the page it points at: the
-// wordmark, the category and date on the label line, the title set large, and
-// the keywords along the bottom. The build also rasterises the card to PNG so
-// link preview crawlers can display it without SVG support.
+// It is drawn as SVG in memory, then rasterised to the PNG the build ships.
+// The card has the page's wordmark, category, date, title, and keywords.
 
 import { lineHeight, textWidth } from "../render/chart/text.mjs";
 import { esc } from "../render/escape.mjs";
@@ -15,28 +13,6 @@ const HEIGHT = 630;
 const MARGIN = 84;
 const TITLE = 68;
 const LABEL = 24;
-
-// An SVG used as a social image does not inherit the site's stylesheet or
-// download its web fonts. Embed the same font files so the card stands alone.
-function embeddedFonts(fonts, text) {
-  const hasHan = /[\u4E00-\u9FFF\uF900-\uFAFF]/.test(text);
-  const faces = [
-    ["cmu-regular", "CMU Serif", 400],
-    ["cmu-bold", "CMU Serif", 700],
-    ["sm-base", "신명조", 400],
-    ["sm-han", "신명조", 400],
-  ];
-  const rules = faces.flatMap(([name, family, weight]) => {
-    if (name === "sm-han" && !hasHan) return [];
-    const data = fonts[name];
-    if (!data) return [];
-    const range = name === "sm-base"
-      ? "unicode-range:U+2190-21FF,U+3000-303F,U+3040-30FF,U+3130-318F,U+AC00-D7A3,U+FF00-FFEF;"
-      : name === "sm-han" ? "unicode-range:U+4E00-9FFF,U+F900-FAFF;" : "";
-    return [`@font-face{font-family:'${family}';font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${data}) format('woff2');${range}}`];
-  });
-  return rules.length ? `<style>${rules.join("")}</style>` : "";
-}
 
 const n = (value) => String(Math.round(value * 100) / 100);
 
@@ -65,10 +41,9 @@ export function wrapTitle(title, { width = WIDTH - MARGIN * 2, size = TITLE, lin
  * One card.
  *
  * The colours are the light theme's ink and paper written out, not the CSS
- * tokens: this file is fetched by a crawler with no stylesheet, and a card
- * that inherits nothing has to carry its own two values.
+ * tokens: the SVG is rendered without the site's stylesheet.
  */
-export function ogCard(post, { siteName = "shxin.blog", fonts = {} } = {}) {
+export function ogCard(post, { siteName = "shxin.blog" } = {}) {
   const title = wrapTitle(post.title || post.slug || "");
   const step = lineHeight(TITLE);
   const label = [post.category, dateText(post.date)].filter(Boolean).join("  ·  ");
@@ -85,7 +60,6 @@ export function ogCard(post, { siteName = "shxin.blog", fonts = {} } = {}) {
     `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" ` +
     `viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${esc(post.title || "")}">` +
     `<title>${esc(post.title || siteName)}</title>` +
-    embeddedFonts(fonts, [post.title, post.category, post.series, ...(post.keywords || [])].join(" ")) +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#fff"/>` +
     // 위아래 두 줄. 종이 위의 논문이라는 조판을 카드에서도 지킨다.
     `<rect x="${MARGIN}" y="${MARGIN - 34}" width="${WIDTH - MARGIN * 2}" height="2" fill="#000"/>` +

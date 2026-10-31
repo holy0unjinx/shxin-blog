@@ -479,13 +479,10 @@ const katexStyle =
     ? await copyKatex()
     : "";
 
-const ogFontFiles = Object.fromEntries(await Promise.all(
-  ["cmu-regular", "cmu-bold", "sm-base", "sm-han"].map(async (name) =>
-    [name, await readFile(join(fontDir, `${name}.woff2`))],
+const ogFontFiles = await Promise.all(
+  ["cmu-regular", "cmu-bold", "sm-base", "sm-han"].map((name) =>
+    readFile(join(fontDir, `${name}.woff2`)),
   ),
-));
-const ogFonts = Object.fromEntries(
-  Object.entries(ogFontFiles).map(([name, file]) => [name, file.toString("base64")]),
 );
 
 for (const [index, { post, document, baked }] of articles.entries()) {
@@ -516,11 +513,9 @@ for (const [index, { post, document, baked }] of articles.entries()) {
   }));
   // 공유 카드는 본문의 그림과 관계없이 글마다 하나씩 그린다.
   await mkdir(join(output, "og"), { recursive: true });
-  const svg = ogCard(post, { fonts: ogFonts });
-  await writeFile(join(output, "og", `${post.slug}.svg`), svg);
   await writeFile(
     join(output, "og", `${post.slug}.png`),
-    await ogPng(svg, Object.values(ogFontFiles)),
+    await ogPng(ogCard(post), ogFontFiles),
   );
 }
 

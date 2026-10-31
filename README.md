@@ -179,8 +179,8 @@ site/         글 묶음 → 사이트 한 벌
   pages.mjs     홈(쪽 나눔) / 글 / 분류 / 키워드 / 시리즈 / 연도 / 404 페이지
   bake.mjs      렌더된 HTML에 수식(KaTeX)과 문법 강조(highlight.js)를 굽는다
   webp.mjs      sharp가 있으면 사진의 webp 쌍둥이를 굽고 <picture>로 감싼다 (없으면 아무 일도 하지 않음)
-  og.mjs        공유 카드 SVG 원본
-  og-png.mjs    SVG 원본과 사이트 글꼴 → 공유용 PNG
+  og.mjs        공유 카드의 중간 도형 생성
+  og-png.mjs    중간 도형과 사이트 글꼴 → 공유용 PNG
   lint.mjs      콘텐츠 점검 (순수 함수, 빌드가 재료를 넘긴다)
   feeds.mjs     rss.xml / sitemap.xml / robots.txt 생성
   minify.mjs    배포용 CSS·JS 축소 (주석·공백만 걷어내는 상태 기계)
@@ -404,7 +404,7 @@ fold: 2      # 2덩이까지 펼치고 나머지는 "더 보기"로 접는다
 
 모든 글은 빌드가 만든 `/og/{slug}.png` 카드를 공유 이미지로 씁니다. 앞머리의 `image` 값이나 본문의 그림은 공유 카드 선택에 영향을 주지 않습니다.
 
-카드에는 워드마크, 분류와 날짜, 제목, 키워드가 들어갑니다. 사이트의 글꼴 파일로 SVG 원본을 그린 다음 1200×630 PNG로 변환합니다. `og:image`와 `twitter:image`는 이 PNG를 가리키며, SVG 원본도 `/og/{slug}.svg`에 남습니다. 글꼴 이용 조건은 `NOTICE`를 참고하세요.
+카드에는 워드마크, 분류와 날짜, 제목, 키워드가 들어갑니다. 사이트 글꼴로 1200×630 PNG를 생성하며, 중간 SVG는 저장하지 않습니다. `og:image`와 `twitter:image`는 이 PNG를 가리킵니다. 글꼴 이용 조건은 `NOTICE`를 참고하세요.
 
 ## 타이포그래피 규칙
 
