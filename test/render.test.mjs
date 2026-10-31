@@ -930,6 +930,13 @@ test("a box keeps paragraphs, lists and math as blocks", () => {
   );
 });
 
+test("a blank line inside a box starts a new paragraph", () => {
+  assert.equal(
+    renderMarkdown("[!BOX]\n첫째 문단.\n\n둘째 문단.\n[/BOX]"),
+    '<div class="callout callout-box"><p>첫째 문단.</p><p>둘째 문단.</p></div>',
+  );
+});
+
 test("a heading inside a box is not a contents entry", () => {
   // 지문 안의 제목은 그 문제의 제목이지 이 글의 절이 아니다. 목차에 올리면
   // 글의 구조가 지문 쪽으로 새고, 같은 글자의 진짜 절이 앵커를 뺏긴다.

@@ -705,6 +705,27 @@ footer {
 .prose .callout p {
   text-indent: 0;
 }
+/* 지문 상자 안의 문단은 본문과 같다. `.prose > p`는 직접 자식만 집고,
+   위의 text-indent: 0이 상자 안까지 덮어 문단이 한 덩이로 읽혔다. */
+.prose .callout-box p {
+  text-align: justify;
+  text-indent: 1em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.8;
+}
+.prose .callout-box > ul + p,
+.prose .callout-box > ol + p,
+.prose .callout-box > .table-wrap + p,
+.prose .callout-box > figure + p,
+.prose .callout-box > .code-block + p,
+.prose .callout-box > .math-display + p,
+.prose .callout-box > .embed + p,
+.prose .callout-box > blockquote + p,
+.prose .callout-box > hr + p {
+  text-indent: 0;
+}
 .prose .callout-title + p {
   margin: 0.5em 0 0;
 }
