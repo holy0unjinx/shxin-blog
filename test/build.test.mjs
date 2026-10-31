@@ -73,6 +73,19 @@ description: "사설 인증서를 왜 쓰게 되었는지."
 먼저 있었던 일.
 `;
 
+// 제 그림을 가진 글. 공유될 때 그린 카드가 아니라 이 그림이 뜬다. 제 분류에
+// 혼자 두어, 이웃 글을 찾는 다른 시험의 셈을 흔들지 않는다.
+const withPhoto = `---
+title: "사진이 있는 글"
+date: 2026-07-10
+category: photo
+slug: with-photo
+description: "본문에 사진이 한 장 있습니다."
+---
+
+![회색 무늬](/assets/sample.png "{#fig:사진} 640×400 PNG")
+`;
+
 // 수식과 코드를 함께 지고, 언어를 스스로 밝히는 글.
 const withCodeAndMath = `---
 title: "A note in English"
@@ -139,6 +152,7 @@ before(() => {
   writeFileSync(join(postsDir, "first-post.md"), withoutKeywords);
   writeFileSync(join(postsDir, "before-ca.md"), olderInSameCategory);
   writeFileSync(join(postsDir, "with-code.md"), withCodeAndMath);
+  writeFileSync(join(postsDir, "with-photo.md"), withPhoto);
   writeFileSync(join(postsDir, "infra-readme.md"), infraReadme);
   writeFileSync(join(postsDir, "notes-readme.md"), notesReadme);
   const build = spawnSync(process.execPath, ["site/build.mjs"], {
@@ -459,6 +473,26 @@ test("README는 목록의 글이 아니다", () => {
     );
   // 분류의 글 수에도 들지 않는다.
   assert.match(read("category/infra/index.html"), /<p>2개의 글<\/p>/);
+});
+
+test("글이 제 그림을 가지고 있으면 그것이 공유 카드다", () => {
+  const html = read("with-photo/index.html");
+  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/assets\/sample\.png">/);
+  assert.match(html, /<meta property="og:image:type" content="image\/png">/);
+  // 크기는 재어 적는다 — 크롤러가 받기 전에 자리를 잡는다.
+  assert.match(html, /<meta property="og:image:width" content="640">/);
+  assert.match(html, /<meta property="og:image:height" content="400">/);
+  assert.match(html, /<meta name="twitter:image" content="https:\/\/example\.test\/assets\/sample\.png">/);
+  // 그려 둔 카드도 그대로 남는다 — 주소는 글의 것이고, 그림을 뺀 날
+  // 그동안 공유된 자리가 빈칸이 되면 안 된다.
+  assert.ok(existsSync(join(dist, "og", "with-photo.svg")));
+});
+
+test("그림이 없는 글은 그려 둔 카드를 쓴다", () => {
+  const html = read("first-post/index.html");
+  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/og\/first-post\.svg">/);
+  assert.match(html, /<meta property="og:image:type" content="image\/svg\+xml">/);
+  assert.match(html, /<meta property="og:image:width" content="1200">/);
 });
 
 test("posts are ordered newest first", () => {

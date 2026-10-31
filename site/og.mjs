@@ -94,3 +94,44 @@ export function ogCard(post, { siteName = "shxin.blog" } = {}) {
 }
 
 export const ogPath = (slug) => `/og/${encodeURIComponent(slug)}.svg`;
+
+// 크롤러가 그리는 그림꼴. svg는 여기 없다 — 카드가 svg라서 그림이 안 뜨는
+// 것이 이 자리의 문제이므로, 그 문제를 가진 꼴을 답으로 고를 수는 없다.
+// webp도 뺀다. 빌드가 쌍둥이로 굽기는 하지만 아직 받지 않는 크롤러가 있고,
+// 원본 png·jpeg가 늘 옆에 남아 있다.
+const SHAREABLE = /\.(png|jpe?g|gif)$/i;
+
+const MIME = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+};
+
+export function imageType(path) {
+  const ext = String(path).split(/[?#]/)[0].split(".").pop().toLowerCase();
+  return MIME[ext] || "";
+}
+
+/**
+ * 글이 제 그림을 가지고 있으면 그 첫 장.
+ *
+ * 그린 카드보다 글이 실은 사진이 낫다 — 크롤러가 svg를 그리지 못해도 뜨고,
+ * 무엇에 관한 글인지 글자보다 먼저 말한다. `measure`는 크기를 재는 사람이고
+ * (빌드가 넘긴다) 없으면 재지 않는다. 너무 작은 그림은 건너뛴다: 본문에 끼인
+ * 아이콘 한 장이 글 전체를 대표하면 공유된 자리에서 글이 우스워진다.
+ */
+export function articleImage(html, { measure = null, minWidth = 400 } = {}) {
+  for (const [tag] of String(html).matchAll(/<img\b[^>]*>/g)) {
+    const src = tag.match(/\bsrc="([^"]*)"/)?.[1];
+    if (!src || src.startsWith("data:") || !SHAREABLE.test(src.split(/[?#]/)[0]))
+      continue;
+    // 바깥 주소는 재지 않으므로(빌드가 남의 서버를 찌르지 않는다) 크기를
+    // 모른 채 받아들인다. 글쓴이가 적어 넣은 것이다.
+    const size = measure?.(src);
+    if (!size || size.width >= minWidth) return src;
+  }
+  return "";
+}

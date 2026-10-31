@@ -18,7 +18,7 @@ import { errorCount, lint, report } from "./lint.mjs";
 import { writePage } from "./editor.mjs";
 import { postFrom } from "./post.mjs";
 import { createSources } from "./sources.mjs";
-import { ogCard, ogPath } from "./og.mjs";
+import { articleImage, imageType, ogCard, ogPath } from "./og.mjs";
 import {
   convertible,
   loadSharp,
@@ -89,6 +89,9 @@ function page({
   keywords,
   current,
   image = "",
+  imageType,
+  imageWidth,
+  imageHeight,
   lang = "ko",
   assets: outside = {},
 }) {
@@ -104,7 +107,16 @@ function page({
         type,
         date,
         keywords,
-        image: image ? `${siteUrl}${image}` : "",
+        // 공유 카드는 절대 주소여야 한다. 글쓴이가 바깥 주소를 적었으면
+        // 그대로 두고, 우리 것만 사이트 주소를 앞에 붙인다.
+        image: image
+          ? /^(?:https?:)?\/\//i.test(image)
+            ? image
+            : `${siteUrl}${image}`
+          : "",
+        imageType,
+        imageWidth,
+        imageHeight,
       }),
     )
     .replace("<!--%ASSETS%-->", pageAssets(outside))
@@ -467,7 +479,23 @@ const katexStyle =
     ? await copyKatex()
     : "";
 
+// 공유될 때 뜰 그림. 글쓴이가 적은 것, 본문의 첫 그림, 빌드가 그린 카드
+// 순이다. 앞의 둘은 png·jpeg라 어느 크롤러에서나 뜨고, 마지막의 svg는
+// 그리지 못하는 크롤러가 있다 — 그림이 있는 글일수록 카드가 실제로 뜬다.
+function shareImage(post, html) {
+  const own = post.image || articleImage(html, { measure: measureImage });
+  if (!own) return { image: ogPath(post.slug), type: "image/svg+xml", width: 1200, height: 630 };
+  const size = measureImage(own);
+  return {
+    image: own,
+    type: imageType(own),
+    width: size?.width || 0,
+    height: size?.height || 0,
+  };
+}
+
 for (const [index, { post, document, baked }] of articles.entries()) {
+  const share = shareImage(post, document.html);
   await write(`/${post.slug}/`, page({
     path: `/${encodeURIComponent(post.slug)}/`,
     title: post.title,
@@ -487,10 +515,15 @@ for (const [index, { post, document, baked }] of articles.entries()) {
     date: post.date,
     keywords: post.keywords,
     lang: post.lang,
-    image: ogPath(post.slug),
+    image: share.image,
+    imageType: share.type,
+    imageWidth: share.width,
+    imageHeight: share.height,
     assets: { math: baked.math, katexStyle },
   }));
-  // 공유 카드. 글마다 하나씩, 빌드가 그린다.
+  // 공유 카드. 글마다 하나씩, 빌드가 그린다. 본문의 그림이 뽑힌 글에도
+  // 그려 둔다 — 주소는 글의 것이고, 그림을 뺀 날 카드가 따라 사라지면
+  // 그동안 공유된 자리가 빈칸이 된다.
   await mkdir(join(output, "og"), { recursive: true });
   await writeFile(join(output, "og", `${post.slug}.svg`), ogCard(post));
 }

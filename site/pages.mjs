@@ -402,6 +402,9 @@ export function head({
   date,
   keywords = [],
   image = "",
+  imageType = "image/svg+xml",
+  imageWidth = 1200,
+  imageHeight = 630,
 }) {
   const tags = [
     `<meta name="description" content="${esc(description)}">`,
@@ -415,12 +418,22 @@ export function head({
   // 카드가 있는 페이지만 큰 카드를 청한다. 그림이 없는데 큰 카드를 청하면
   // 자리가 비어 나온다.
   if (image) {
+    tags.push(`<meta property="og:image" content="${esc(image)}">`);
+    if (imageType)
+      tags.push(`<meta property="og:image:type" content="${esc(imageType)}">`);
+    if (imageWidth && imageHeight)
+      tags.push(
+        `<meta property="og:image:width" content="${esc(imageWidth)}">`,
+        `<meta property="og:image:height" content="${esc(imageHeight)}">`,
+      );
     tags.push(
-      `<meta property="og:image" content="${esc(image)}">`,
-      `<meta property="og:image:type" content="image/svg+xml">`,
-      `<meta property="og:image:width" content="1200">`,
-      `<meta property="og:image:height" content="630">`,
-      `<meta name="twitter:card" content="summary_large_image">`,
+      // 큰 카드는 가로가 긴 그림에만 어울린다. 세로로 긴 사진을 큰 카드로
+      // 청하면 위아래가 잘려 무엇인지 알아볼 수 없게 나간다.
+      `<meta name="twitter:card" content="${
+        imageWidth && imageHeight && imageWidth < imageHeight
+          ? "summary"
+          : "summary_large_image"
+      }">`,
       `<meta name="twitter:image" content="${esc(image)}">`,
     );
   } else tags.push(`<meta name="twitter:card" content="summary">`);
