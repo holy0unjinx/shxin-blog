@@ -100,7 +100,7 @@ test("serves the home page with security headers", async () => {
 });
 
 test("production redirects the old hosts to the canonical domain", async () => {
-  for (const host of ["blog.shxin.kr", "www.shxin.kr"]) {
+  for (const host of ["blog.shxin.kr", "www.shxin.blog"]) {
     const response = await new Promise((resolve, reject) => {
       const request = httpRequest(base + "/the-first-thing/?from=old", {
         headers: { Host: host },
@@ -113,6 +113,16 @@ test("production redirects the old hosts to the canonical domain", async () => {
       "https://shxin.blog/the-first-thing/?from=old");
     response.resume();
   }
+
+  const otherHost = await new Promise((resolve, reject) => {
+    const request = httpRequest(base + "/", {
+      headers: { Host: "www.shxin.kr" },
+    }, resolve);
+    request.once("error", reject);
+    request.end();
+  });
+  assert.equal(otherHost.statusCode, 200);
+  otherHost.resume();
 
   const dev = await new Promise((resolve, reject) => {
     const request = httpRequest(devBase + "/", {

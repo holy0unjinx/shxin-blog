@@ -386,7 +386,7 @@ function send(request, response, status, file) {
 createServer(async (request, response) => {
   // 예전 주소에서 들어온 요청은 경로와 검색 조건을 보존해 대표 도메인으로 보낸다.
   // 개발 서버는 별개로 접속하므로 이 규칙을 적용하지 않는다.
-  if (!DEV && /^(?:blog|www)\.shxin\.kr(?::\d+)?$/i.test(request.headers.host || "")) {
+  if (!DEV && /^(?:blog\.shxin\.kr|www\.shxin\.blog)(?::\d+)?$/i.test(request.headers.host || "")) {
     const url = new URL(request.url, "http://localhost");
     response.writeHead(308, {
       ...SECURITY_HEADERS,
