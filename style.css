@@ -445,7 +445,7 @@ body {
 .post-card h2,
 .series-list a {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 25px;
   letter-spacing: -0.02em;
   line-height: 1.25;
 }
