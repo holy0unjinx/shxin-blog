@@ -372,9 +372,8 @@ function quoteBlock(quote, text, section, numbering, outline = true) {
   const label = quote[0]?.match(/^\[!(\w+)\]\s*(.*)$/);
   const kind = label ? label[1].toUpperCase() : "";
   const isDetails = kind === "DETAILS";
-  const isBox = kind === "BOX";
   const isEnvironment = ENVIRONMENTS.has(kind);
-  if (!label || (!isDetails && !isBox && !isEnvironment && !CALLOUTS.has(kind))) {
+  if (!label || (!isDetails && !isEnvironment && !CALLOUTS.has(kind))) {
     // 출처 줄은 일반 인용에만 붙는다. 다른 상자의 마지막 줄을 빼앗지 않는다.
     const attribution = quote.length > 1 && SOURCE_LINE.test(quote[quote.length - 1])
       ? quote.pop().replace(SOURCE_LINE, "").trim()
@@ -385,11 +384,6 @@ function quoteBlock(quote, text, section, numbering, outline = true) {
           `<figcaption class="quote-source">— ${text(attribution)}</figcaption></figure>`
       : quoted;
   }
-
-  // 문제·지문을 두르는 상자. 첫 줄의 글도 제목으로 빼지 않고 본문에 둔다.
-  // 안의 제목은 지문의 제목이지 이 글의 절이 아니라, 목차에 올리지 않는다.
-  if (isBox)
-    return `<div class="callout callout-box">${section([label[2], ...quote.slice(1)].join("\n"), false)}</div>`;
 
   const body = section(quote.slice(1).join("\n"), outline);
 
@@ -430,6 +424,10 @@ const trimBreak = (value) => value.replace(new RegExp(`${BREAK}\\s*$`), "");
 // 인용 아래에 붙는 출처 줄. 전각 대시와 하이픈 둘 다 받는다 — 원고에서 어느
 // 쪽을 쓸지는 자판이 정한다.
 const SOURCE_LINE = /^\s*(?:—|--)\s+/;
+
+// 문제·지문을 두르는 상자. 인용 마커를 매 줄에 붙이지 않고 시작과 끝만 적는다.
+const BOX_OPEN = /^\[!BOX\](?:\s+(.*))?$/i;
+const BOX_CLOSE = /^\[\/BOX\]\s*$/i;
 
 // 뜻 줄. 캡션(": 내용")과 갈리도록 콜론을 둘 쓴다.
 const DEFINITION_ITEM = /^::\s+(.*)$/;
@@ -852,6 +850,17 @@ export function renderDocument(source, options = {}) {
     let out = "";
     let i = 0;
     while (i < lines.length) {
+      const opened = lines[i].match(BOX_OPEN);
+      if (opened) {
+        // 안의 제목은 지문의 제목이지 이 글의 절이 아니라, 목차에 올리지 않는다.
+        i++;
+        const boxed = [];
+        if (opened[1]) boxed.push(opened[1]);
+        while (i < lines.length && !BOX_CLOSE.test(lines[i])) boxed.push(lines[i++]);
+        if (i < lines.length) i++;
+        out += `<div class="callout callout-box">${renderSection(boxed.join("\n"), false)}</div>`;
+        continue;
+      }
       if (/^>\s?/.test(lines[i])) {
         const quote = [];
         while (i < lines.length && /^>\s?/.test(lines[i]))
@@ -860,7 +869,12 @@ export function renderDocument(source, options = {}) {
         continue;
       }
       const chunk = [];
-      while (i < lines.length && !/^>\s?/.test(lines[i])) chunk.push(lines[i++]);
+      while (
+        i < lines.length &&
+        !/^>\s?/.test(lines[i]) &&
+        !BOX_OPEN.test(lines[i])
+      )
+        chunk.push(lines[i++]);
       out += renderBlocks(extract(chunk.join("\n")).split(/\r?\n/), outline);
     }
     return out;
@@ -1045,6 +1059,7 @@ export function excerpt(body) {
     // 주소 정의 줄, 알림 상자 이름표, 할 일 상자는 글이 아니다.
     .replace(/^\[[^\^\]][^\]]*\]:[ \t]*\S+.*$/gm, "")
     .replace(/^[ \t]*>?[ \t]*\[!\w+\]/gm, "")
+    .replace(/^[ \t]*\[\/BOX\][ \t]*$/gim, "")
     .replace(/\[[ xX]\]/g, "")
     // 줄 끊기 표시는 글이 아니다. 짝수 개는 글자로 쓴 역슬래시이므로
     // 아래 이스케이프 규칙이 가져간다.
@@ -1086,6 +1101,7 @@ export function readingMinutes(body) {
     .replace(/^\[[^\^\]][^\]]*\]:[ \t]*\S+.*$/gm, " ")
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
     .replace(/^[ \t]*>?[ \t]*\[!\w+\]/gm, " ")
+    .replace(/^[ \t]*\[\/BOX\][ \t]*$/gim, " ")
     .replace(/\[[ xX]\]/g, " ")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/[*_`>#|~=-]/g, " ");
@@ -1123,6 +1139,7 @@ export function searchText(body) {
     // 알림 상자의 이름표와 할 일 상자. 상자 제목과 칸의 글은 글이므로
     // 표시만 걷는다.
     .replace(/^[ \t]*\[!\w+\][ \t]*/gm, " ")
+    .replace(/^[ \t]*\[\/BOX\][ \t]*/gim, " ")
     .replace(/^([ \t]*(?:[-*+]|\d+\.)[ \t]+)\[[ xX]\][ \t]+/gm, "$1")
     .replace(/\|/g, " ")
     // 줄 끊기 표시는 글이 아니다. 짝수 개는 글자로 쓴 역슬래시이므로

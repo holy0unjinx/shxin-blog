@@ -916,7 +916,7 @@ test("a callout with no body is only its name", () => {
 
 test("a box frames only the marked passage without adding a title", () => {
   assert.equal(
-    renderMarkdown("앞 문단.\n\n> [!BOX] 문제 1\n> 다음 지문을 읽으시오.\n\n뒤 문단."),
+    renderMarkdown("앞 문단.\n\n[!BOX] 문제 1\n다음 지문을 읽으시오.\n[/BOX]\n\n뒤 문단."),
     '<p>앞 문단.</p><div class="callout callout-box">' +
       '<p>문제 1 다음 지문을 읽으시오.</p></div><p>뒤 문단.</p>',
   );
@@ -924,7 +924,7 @@ test("a box frames only the marked passage without adding a title", () => {
 
 test("a box keeps paragraphs, lists and math as blocks", () => {
   assert.equal(
-    renderMarkdown("> [!BOX]\n> $x^2$를 구하시오.\n>\n> 1. 첫째\n> 2. 둘째"),
+    renderMarkdown("[!BOX]\n$x^2$를 구하시오.\n\n1. 첫째\n2. 둘째\n[/BOX]"),
     '<div class="callout callout-box"><p><span class="math math-inline">x^2</span>' +
       '를 구하시오.</p><ol><li>첫째</li><li>둘째</li></ol></div>',
   );
@@ -934,7 +934,7 @@ test("a heading inside a box is not a contents entry", () => {
   // 지문 안의 제목은 그 문제의 제목이지 이 글의 절이 아니다. 목차에 올리면
   // 글의 구조가 지문 쪽으로 새고, 같은 글자의 진짜 절이 앵커를 뺏긴다.
   const { html, headings } = renderDocument(
-    "> [!BOX]\n> ## 지문 제목\n> 본문.\n\n## 지문 제목\n\n## 다음 절",
+    "[!BOX]\n## 지문 제목\n본문.\n[/BOX]\n\n## 지문 제목\n\n## 다음 절",
   );
   assert.deepEqual(
     headings.map((heading) => heading.text),
@@ -942,6 +942,13 @@ test("a heading inside a box is not a contents entry", () => {
   );
   assert.match(html, /<div class="callout callout-box"><h3>지문 제목<\/h3>/);
   assert.match(html, /<h3 id="지문-제목">지문 제목<\/h3>/);
+});
+
+test("a box can hold a code fence without quoting every line", () => {
+  const html = renderMarkdown("[!BOX]\n```js\nconst a = 1;\n```\n[/BOX]");
+  assert.match(html, /<div class="callout callout-box">/);
+  assert.match(html, /<code class="language-js">/);
+  assert.doesNotMatch(html, /\[\/BOX\]/);
 });
 
 test("an unknown label leaves the quote a quote", () => {
@@ -995,6 +1002,10 @@ test("search text drops the new markers and keeps the letters", () => {
     "> [!WARNING] 조심할 것",
     "> 상자 본문.",
     "",
+    "[!BOX]",
+    "지문 본문.",
+    "[/BOX]",
+    "",
     "- [x] 끝난 일",
     "",
     "[RFC 8446][tls13]을 봅니다.",
@@ -1003,10 +1014,10 @@ test("search text drops the new markers and keeps the letters", () => {
   ].join("\n");
   const text = searchText(body);
   // 글은 남는다: 상자 제목도 할 일 칸도 사람이 쓴 글이다.
-  for (const word of ["칠한 글", "지운 글", "조심할 것", "상자 본문", "끝난 일", "RFC 8446"])
+  for (const word of ["칠한 글", "지운 글", "조심할 것", "상자 본문", "지문 본문", "끝난 일", "RFC 8446"])
     assert.match(text, new RegExp(word));
   // 표시는 남지 않는다. 찾는 사람은 글에 보이는 대로 친다.
-  for (const marker of ["==", "~~", "[!WARNING]", "[x]", "\\\\", "rfc-editor"])
+  for (const marker of ["==", "~~", "[!WARNING]", "[!BOX]", "[/BOX]", "[x]", "\\\\", "rfc-editor"])
     assert.ok(!text.includes(marker), `검색 본문에 ${marker}가 남았다`);
   // 글자로 쓴 별은 글자다.
   assert.match(text, /\*별\*/);
