@@ -73,14 +73,15 @@ description: "사설 인증서를 왜 쓰게 되었는지."
 먼저 있었던 일.
 `;
 
-// 제 그림을 가진 글. 공유될 때 그린 카드가 아니라 이 그림이 뜬다. 제 분류에
-// 혼자 두어, 이웃 글을 찾는 다른 시험의 셈을 흔들지 않는다.
+// 본문과 앞머리에 그림이 있지만 공유할 때는 전용 카드만 쓰는 글.
+// 제 분류에 혼자 두어, 이웃 글을 찾는 다른 시험의 셈을 흔들지 않는다.
 const withPhoto = `---
 title: "사진이 있는 글"
 date: 2026-07-10
 category: photo
 slug: with-photo
 description: "본문에 사진이 한 장 있습니다."
+image: /assets/sample.png
 ---
 
 ![회색 무늬](/assets/sample.png "{#fig:사진} 640×400 PNG")
@@ -475,24 +476,26 @@ test("README는 목록의 글이 아니다", () => {
   assert.match(read("category/infra/index.html"), /<p>2개의 글<\/p>/);
 });
 
-test("글이 제 그림을 가지고 있으면 그것이 공유 카드다", () => {
+test("본문과 앞머리에 그림이 있어도 생성한 카드만 공유한다", () => {
   const html = read("with-photo/index.html");
-  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/assets\/sample\.png">/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/og\/with-photo\.png">/);
   assert.match(html, /<meta property="og:image:type" content="image\/png">/);
-  // 크기는 재어 적는다 — 크롤러가 받기 전에 자리를 잡는다.
-  assert.match(html, /<meta property="og:image:width" content="640">/);
-  assert.match(html, /<meta property="og:image:height" content="400">/);
-  assert.match(html, /<meta name="twitter:image" content="https:\/\/example\.test\/assets\/sample\.png">/);
-  // 그려 둔 카드도 그대로 남는다 — 주소는 글의 것이고, 그림을 뺀 날
-  // 그동안 공유된 자리가 빈칸이 되면 안 된다.
-  assert.ok(existsSync(join(dist, "og", "with-photo.svg")));
+  assert.match(html, /<meta property="og:image:width" content="1200">/);
+  assert.match(html, /<meta property="og:image:height" content="630">/);
+  assert.match(html, /<meta name="twitter:image" content="https:\/\/example\.test\/og\/with-photo\.png">/);
+  assert.match(html, /src="\/assets\/sample\.png"/);
+  assert.ok(existsSync(join(dist, "og", "with-photo.png")));
 });
 
 test("그림이 없는 글은 그려 둔 카드를 쓴다", () => {
   const html = read("first-post/index.html");
-  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/og\/first-post\.svg">/);
-  assert.match(html, /<meta property="og:image:type" content="image\/svg\+xml">/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/example\.test\/og\/first-post\.png">/);
+  assert.match(html, /<meta property="og:image:type" content="image\/png">/);
   assert.match(html, /<meta property="og:image:width" content="1200">/);
+  const png = readFileSync(join(dist, "og", "first-post.png"));
+  assert.deepEqual(png.subarray(0, 8), Buffer.from("89504e470d0a1a0a", "hex"));
+  assert.equal(png.readUInt32BE(16), 1200);
+  assert.equal(png.readUInt32BE(20), 630);
 });
 
 test("posts are ordered newest first", () => {

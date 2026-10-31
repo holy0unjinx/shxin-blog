@@ -72,7 +72,8 @@ const CSP = [
   // writes inline styles while rendering.
   "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-  "font-src 'self' https://cdn.jsdelivr.net",
+  // Standalone social-card SVGs embed the site's WOFF2 fonts as data URLs.
+  "font-src 'self' data: https://cdn.jsdelivr.net",
   "img-src 'self' data: https:",
   "media-src 'self' https:",
   "frame-src https:",

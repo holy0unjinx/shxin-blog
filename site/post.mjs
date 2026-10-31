@@ -41,9 +41,6 @@ export function postFrom({ data = {}, body = "", slug, draft = false }) {
     keywords: keywordList(data.keywords),
     readMinutes: readingMinutes(body),
     bib: data.bib || "",
-    // 공유 카드로 쓸 그림. 적지 않으면 본문의 첫 그림을 쓰고, 그것도 없으면
-    // 빌드가 그린 카드가 선다.
-    image: data.image || "",
     // 여러 편으로 나눈 글. part를 적지 않으면 날짜순으로 매겨진다.
     series: data.series || "",
     seriesSlug: data.series ? data.seriesSlug || slugify(data.series) : "",

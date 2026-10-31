@@ -402,7 +402,7 @@ export function head({
   date,
   keywords = [],
   image = "",
-  imageType = "image/svg+xml",
+  imageType = "image/png",
   imageWidth = 1200,
   imageHeight = 630,
 }) {

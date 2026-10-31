@@ -18,7 +18,8 @@ import { errorCount, lint, report } from "./lint.mjs";
 import { writePage } from "./editor.mjs";
 import { postFrom } from "./post.mjs";
 import { createSources } from "./sources.mjs";
-import { articleImage, imageType, ogCard, ogPath } from "./og.mjs";
+import { ogCard, ogPath } from "./og.mjs";
+import { ogPng } from "./og-png.mjs";
 import {
   convertible,
   loadSharp,
@@ -107,8 +108,7 @@ function page({
         type,
         date,
         keywords,
-        // 공유 카드는 절대 주소여야 한다. 글쓴이가 바깥 주소를 적었으면
-        // 그대로 두고, 우리 것만 사이트 주소를 앞에 붙인다.
+        // 공유 카드는 절대 주소여야 한다.
         image: image
           ? /^(?:https?:)?\/\//i.test(image)
             ? image
@@ -479,23 +479,16 @@ const katexStyle =
     ? await copyKatex()
     : "";
 
-// 공유될 때 뜰 그림. 글쓴이가 적은 것, 본문의 첫 그림, 빌드가 그린 카드
-// 순이다. 앞의 둘은 png·jpeg라 어느 크롤러에서나 뜨고, 마지막의 svg는
-// 그리지 못하는 크롤러가 있다 — 그림이 있는 글일수록 카드가 실제로 뜬다.
-function shareImage(post, html) {
-  const own = post.image || articleImage(html, { measure: measureImage });
-  if (!own) return { image: ogPath(post.slug), type: "image/svg+xml", width: 1200, height: 630 };
-  const size = measureImage(own);
-  return {
-    image: own,
-    type: imageType(own),
-    width: size?.width || 0,
-    height: size?.height || 0,
-  };
-}
+const ogFontFiles = Object.fromEntries(await Promise.all(
+  ["cmu-regular", "cmu-bold", "sm-base", "sm-han"].map(async (name) =>
+    [name, await readFile(join(fontDir, `${name}.woff2`))],
+  ),
+));
+const ogFonts = Object.fromEntries(
+  Object.entries(ogFontFiles).map(([name, file]) => [name, file.toString("base64")]),
+);
 
 for (const [index, { post, document, baked }] of articles.entries()) {
-  const share = shareImage(post, document.html);
   await write(`/${post.slug}/`, page({
     path: `/${encodeURIComponent(post.slug)}/`,
     title: post.title,
@@ -515,17 +508,20 @@ for (const [index, { post, document, baked }] of articles.entries()) {
     date: post.date,
     keywords: post.keywords,
     lang: post.lang,
-    image: share.image,
-    imageType: share.type,
-    imageWidth: share.width,
-    imageHeight: share.height,
+    image: ogPath(post.slug),
+    imageType: "image/png",
+    imageWidth: 1200,
+    imageHeight: 630,
     assets: { math: baked.math, katexStyle },
   }));
-  // 공유 카드. 글마다 하나씩, 빌드가 그린다. 본문의 그림이 뽑힌 글에도
-  // 그려 둔다 — 주소는 글의 것이고, 그림을 뺀 날 카드가 따라 사라지면
-  // 그동안 공유된 자리가 빈칸이 된다.
+  // 공유 카드는 본문의 그림과 관계없이 글마다 하나씩 그린다.
   await mkdir(join(output, "og"), { recursive: true });
-  await writeFile(join(output, "og", `${post.slug}.svg`), ogCard(post));
+  const svg = ogCard(post, { fonts: ogFonts });
+  await writeFile(join(output, "og", `${post.slug}.svg`), svg);
+  await writeFile(
+    join(output, "og", `${post.slug}.png`),
+    await ogPng(svg, Object.values(ogFontFiles)),
+  );
 }
 
 // 키워드는 앞머리에 여러 개가 오고 여러 글이 나눠 쓴다. 분류가 글 하나에
