@@ -384,6 +384,18 @@ function send(request, response, status, file) {
 }
 
 createServer(async (request, response) => {
+  // 예전 주소에서 들어온 요청은 경로와 검색 조건을 보존해 대표 도메인으로 보낸다.
+  // 개발 서버는 별개로 접속하므로 이 규칙을 적용하지 않는다.
+  if (!DEV && /^(?:blog|www)\.shxin\.kr(?::\d+)?$/i.test(request.headers.host || "")) {
+    const url = new URL(request.url, "http://localhost");
+    response.writeHead(308, {
+      ...SECURITY_HEADERS,
+      Location: `https://shxin.blog${url.pathname}${url.search}`,
+    });
+    response.end();
+    return;
+  }
+
   // 편집기의 두 경로. DEV가 아니면 이 자리가 통째로 없으므로, 나가는 서버는
   // 지금까지와 똑같이 아래의 405로 떨어진다.
   if (editor && request.method === "POST") {

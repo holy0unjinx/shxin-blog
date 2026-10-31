@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
+import { request as httpRequest } from "node:http";
 import {
   existsSync,
   mkdtempSync,
@@ -96,6 +97,32 @@ test("serves the home page with security headers", async () => {
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
   assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.match(await response.text(), /<header class="site-head">/);
+});
+
+test("production redirects the old hosts to the canonical domain", async () => {
+  for (const host of ["blog.shxin.kr", "www.shxin.kr"]) {
+    const response = await new Promise((resolve, reject) => {
+      const request = httpRequest(base + "/the-first-thing/?from=old", {
+        headers: { Host: host },
+      }, resolve);
+      request.once("error", reject);
+      request.end();
+    });
+    assert.equal(response.statusCode, 308);
+    assert.equal(response.headers.location,
+      "https://shxin.blog/the-first-thing/?from=old");
+    response.resume();
+  }
+
+  const dev = await new Promise((resolve, reject) => {
+    const request = httpRequest(devBase + "/", {
+      headers: { Host: "blog.shxin.kr" },
+    }, resolve);
+    request.once("error", reject);
+    request.end();
+  });
+  assert.equal(dev.statusCode, 200);
+  dev.resume();
 });
 
 test("development preview can be framed by ANA", async () => {
