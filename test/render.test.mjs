@@ -914,6 +914,36 @@ test("a callout with no body is only its name", () => {
   );
 });
 
+test("a box frames only the marked passage without adding a title", () => {
+  assert.equal(
+    renderMarkdown("앞 문단.\n\n> [!BOX] 문제 1\n> 다음 지문을 읽으시오.\n\n뒤 문단."),
+    '<p>앞 문단.</p><div class="callout callout-box">' +
+      '<p>문제 1 다음 지문을 읽으시오.</p></div><p>뒤 문단.</p>',
+  );
+});
+
+test("a box keeps paragraphs, lists and math as blocks", () => {
+  assert.equal(
+    renderMarkdown("> [!BOX]\n> $x^2$를 구하시오.\n>\n> 1. 첫째\n> 2. 둘째"),
+    '<div class="callout callout-box"><p><span class="math math-inline">x^2</span>' +
+      '를 구하시오.</p><ol><li>첫째</li><li>둘째</li></ol></div>',
+  );
+});
+
+test("a heading inside a box is not a contents entry", () => {
+  // 지문 안의 제목은 그 문제의 제목이지 이 글의 절이 아니다. 목차에 올리면
+  // 글의 구조가 지문 쪽으로 새고, 같은 글자의 진짜 절이 앵커를 뺏긴다.
+  const { html, headings } = renderDocument(
+    "> [!BOX]\n> ## 지문 제목\n> 본문.\n\n## 지문 제목\n\n## 다음 절",
+  );
+  assert.deepEqual(
+    headings.map((heading) => heading.text),
+    ["지문 제목", "다음 절"],
+  );
+  assert.match(html, /<div class="callout callout-box"><h3>지문 제목<\/h3>/);
+  assert.match(html, /<h3 id="지문-제목">지문 제목<\/h3>/);
+});
+
 test("an unknown label leaves the quote a quote", () => {
   // 모르는 이름을 상자로 만들면 오타가 조판을 바꾼다.
   assert.equal(

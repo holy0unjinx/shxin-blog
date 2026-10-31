@@ -368,17 +368,17 @@ const ENVIRONMENTS = new Map([
  * paragraph, which is what lets a proof hold a list, a display equation or a
  * code fence. `numbering` gives an environment its number.
  */
-function quoteBlock(quote, text, section, numbering) {
-  // 인용의 마지막 줄이 "—"로 시작하면 출처다. 인용문 안에 섞여 같은 크기로
-  // 서면 누가 한 말인지가 그 말의 일부처럼 읽힌다.
-  const attribution = quote.length > 1 && SOURCE_LINE.test(quote[quote.length - 1])
-    ? quote.pop().replace(SOURCE_LINE, "").trim()
-    : "";
+function quoteBlock(quote, text, section, numbering, outline = true) {
   const label = quote[0]?.match(/^\[!(\w+)\]\s*(.*)$/);
   const kind = label ? label[1].toUpperCase() : "";
   const isDetails = kind === "DETAILS";
+  const isBox = kind === "BOX";
   const isEnvironment = ENVIRONMENTS.has(kind);
-  if (!label || (!isDetails && !isEnvironment && !CALLOUTS.has(kind))) {
+  if (!label || (!isDetails && !isBox && !isEnvironment && !CALLOUTS.has(kind))) {
+    // 출처 줄은 일반 인용에만 붙는다. 다른 상자의 마지막 줄을 빼앗지 않는다.
+    const attribution = quote.length > 1 && SOURCE_LINE.test(quote[quote.length - 1])
+      ? quote.pop().replace(SOURCE_LINE, "").trim()
+      : "";
     const quoted = `<blockquote>${text(trimBreak(quote.join(" ")))}</blockquote>`;
     return attribution
       ? `<figure class="quote">${quoted}` +
@@ -386,7 +386,12 @@ function quoteBlock(quote, text, section, numbering) {
       : quoted;
   }
 
-  const body = section(quote.slice(1).join("\n"));
+  // 문제·지문을 두르는 상자. 첫 줄의 글도 제목으로 빼지 않고 본문에 둔다.
+  // 안의 제목은 지문의 제목이지 이 글의 절이 아니라, 목차에 올리지 않는다.
+  if (isBox)
+    return `<div class="callout callout-box">${section([label[2], ...quote.slice(1)].join("\n"), false)}</div>`;
+
+  const body = section(quote.slice(1).join("\n"), outline);
 
   if (isEnvironment) {
     const series = ENVIRONMENTS.get(kind);
@@ -713,7 +718,7 @@ export function renderDocument(source, options = {}) {
    * fences, display math, figures — is already a @@BLOCK@@ placeholder by
    * now, and a placeholder is one line wherever it lands.
    */
-  const renderBlocks = (lines) => {
+  const renderBlocks = (lines, outline = true) => {
   let html = "";
   let i = 0;
 
@@ -750,11 +755,15 @@ export function renderDocument(source, options = {}) {
       // 않으므로, 그 이름을 부르면 제목의 글자가 링크로 나온다.
       const marked = takeLabel(heading[2]);
       const title = marked.kind === "sec" ? marked.rest : heading[2];
-      const id = headingId(title);
-      if (marked.kind === "sec")
-        numbering.defineSection(marked.label, plainText(title), id);
-      headings.push({ level, id, text: plainText(title) });
-      html += `<h${level} id="${id}">${text(title)}</h${level}>`;
+      if (outline) {
+        const id = headingId(title);
+        if (marked.kind === "sec")
+          numbering.defineSection(marked.label, plainText(title), id);
+        headings.push({ level, id, text: plainText(title) });
+        html += `<h${level} id="${id}">${text(title)}</h${level}>`;
+      } else {
+        html += `<h${level}>${text(title)}</h${level}>`;
+      }
       i++;
       continue;
     }
@@ -838,7 +847,7 @@ export function renderDocument(source, options = {}) {
    * free: a proof holds a display equation, a callout holds a list, and a
    * quote inside either is still a quote.
    */
-  const renderSection = (source) => {
+  const renderSection = (source, outline = true) => {
     const lines = String(source).split(/\r?\n/);
     let out = "";
     let i = 0;
@@ -847,12 +856,12 @@ export function renderDocument(source, options = {}) {
         const quote = [];
         while (i < lines.length && /^>\s?/.test(lines[i]))
           quote.push(hardBreak(lines[i++].replace(/^>\s?/, "")));
-        out += quoteBlock(quote, text, renderSection, numbering);
+        out += quoteBlock(quote, text, renderSection, numbering, outline);
         continue;
       }
       const chunk = [];
       while (i < lines.length && !/^>\s?/.test(lines[i])) chunk.push(lines[i++]);
-      out += renderBlocks(extract(chunk.join("\n")).split(/\r?\n/));
+      out += renderBlocks(extract(chunk.join("\n")).split(/\r?\n/), outline);
     }
     return out;
   };

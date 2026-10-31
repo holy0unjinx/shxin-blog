@@ -99,6 +99,7 @@ export const GROUPS = [
     name: "인용",
     items: [
       { label: "인용문", block: true, snippet: `> ${CARET}` },
+      { label: "테두리 상자", block: true, snippet: `> [!BOX]\n> ${CARET}` },
       {
         label: "출처 붙은 인용",
         block: true,

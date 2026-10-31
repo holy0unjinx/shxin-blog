@@ -679,6 +679,17 @@ footer {
 .prose .callout-caution {
   border-left-width: 5px;
 }
+/* 문제·지문 상자에는 제목이나 바탕 없이 네 변의 선만 둔다. */
+.prose .callout-box {
+  background: transparent;
+  border: 1px solid var(--ink);
+}
+.prose .callout-box > :first-child {
+  margin-top: 0;
+}
+.prose .callout-box > :last-child {
+  margin-bottom: 0;
+}
 /* 이름표는 제목 노릇을 하므로 아래 본문을 들여쓰지 않는다. 본문 문단은
    .prose의 자식이 아니라 여기서 여백을 따로 적는다. */
 .prose .callout-title {
