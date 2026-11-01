@@ -15,7 +15,7 @@ import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 import { minifyCss, stripJsComments } from "./minify.mjs";
 import { bake } from "./bake.mjs";
 import { errorCount, lint, report } from "./lint.mjs";
-import { writePage } from "./editor.mjs";
+import { refsPage, writePage } from "./editor.mjs";
 import { postFrom } from "./post.mjs";
 import { createSources } from "./sources.mjs";
 import { ogCard, ogPath } from "./og.mjs";
@@ -700,7 +700,7 @@ const routes = new Set([
 // dev 전용 편집기. 나가는 빌드에는 페이지도, 그 스타일도, 그 코드도 없다.
 // sitemap·rss·posts.json 어디에도 넣지 않는다 — 읽을 글이 아니다.
 if (DEV) {
-  for (const asset of ["editor.css", "editor.js"]) {
+  for (const asset of ["editor.css", "editor.js", "refs-editor.js"]) {
     const source = await readFile(join(root, asset), "utf8");
     // 지문을 붙이지 않는다. dev 서버는 무엇이든 no-cache로 내보내므로
     // 이름이 바뀔 이유가 없고, 이름이 고정이라야 편집기 페이지가 그것을
@@ -717,6 +717,16 @@ if (DEV) {
       katexStyle,
       styles: ["/editor.css"],
       scripts: ["/editor.js"],
+    },
+  }));
+  await write("/write/refs/", page({
+    path: "/write/refs/",
+    title: "참고문헌 편집",
+    description: "dev 전용 refs.bib 편집기",
+    content: refsPage(),
+    assets: {
+      styles: ["/editor.css"],
+      scripts: ["/refs-editor.js"],
     },
   }));
 }

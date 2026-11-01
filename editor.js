@@ -15,6 +15,7 @@
   const paper = root.querySelector(".write-paper");
   const status = root.querySelector(".write-status");
   const save = root.querySelector(".write-save");
+  const load = root.querySelector(".write-load");
   const fresh = root.querySelector(".write-new");
   const { starter, groups } = JSON.parse(
     root.querySelector(".write-snippets").textContent,
@@ -187,6 +188,49 @@
     }
   });
 
+  async function loadDraft(name) {
+    const wanted = (name ?? slug.value).trim();
+    if (!wanted) {
+      say("이름(slug)을 먼저 적는다");
+      slug.focus();
+      return false;
+    }
+    if (
+      text.value.trim() &&
+      text.value !== starter &&
+      !confirm("쓰던 원고를 버리고 불러온다")
+    )
+      return false;
+    try {
+      const response = await fetch(
+        `/api/draft?slug=${encodeURIComponent(wanted)}`,
+      );
+      const answer = await response.json();
+      if (!answer.ok) {
+        say(`불러오기 실패 — ${answer.message}`);
+        return false;
+      }
+      text.value = answer.source;
+      slug.value = answer.slug;
+      remember();
+      schedule();
+      say(`${answer.path} 불러옴`);
+      return true;
+    } catch (error) {
+      say(`불러오기 실패 — ${error.message}`);
+      return false;
+    }
+  }
+
+  load.addEventListener("click", () => {
+    loadDraft();
+  });
+  slug.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    loadDraft();
+  });
+
   fresh.addEventListener("click", () => {
     if (text.value.trim() && !confirm("쓰던 원고를 버리고 새로 시작한다")) return;
     text.value = starter || "";
@@ -196,8 +240,17 @@
     remember();
   });
 
+  const wanted = new URLSearchParams(location.search).get("slug");
   const saved = recall();
   text.value = saved?.source || starter || "";
   slug.value = saved?.slug || "";
-  draw();
+  if (wanted) {
+    // 주소로 다른 원고를 열더라도 브라우저에 남은 미저장 글을 묻지 않고
+    // 덮어쓰지는 않는다. 불러오기에 실패하면 그 글을 계속 보여 준다.
+    loadDraft(wanted).then((ok) => {
+      if (!ok) draw();
+    });
+  } else {
+    draw();
+  }
 })();

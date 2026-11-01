@@ -7,6 +7,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -30,6 +31,8 @@ const devBase = `http://127.0.0.1:${devPort}`;
 const devDist = mkdtempSync(join(tmpdir(), "shxin-serve-dev-"));
 // 진짜 draft/를 건드리지 않는다 — 시험이 저장소에 파일을 쓰면 안 된다.
 const drafts = mkdtempSync(join(tmpdir(), "shxin-drafts-"));
+const refsDir = mkdtempSync(join(tmpdir(), "shxin-refs-"));
+const refsFile = join(refsDir, "refs.bib");
 let devServer;
 
 const post = (path, body, base = devBase) =>
@@ -40,6 +43,7 @@ const post = (path, body, base = devBase) =>
   });
 
 before(async () => {
+  writeFileSync(refsFile, "@misc{initial, title={Initial}}\n");
   const build = spawnSync(process.execPath, ["site/build.mjs"], {
     cwd: root,
     encoding: "utf8",
@@ -72,6 +76,7 @@ before(async () => {
       PORT: String(devPort),
       OUT_DIR: devDist,
       DRAFT_DIR: drafts,
+      REFS_FILE: refsFile,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -85,7 +90,7 @@ before(async () => {
 after(() => {
   server?.kill();
   devServer?.kill();
-  for (const dir of [dist, devDist, drafts])
+  for (const dir of [dist, devDist, drafts, refsDir])
     rmSync(dir, { recursive: true, force: true });
 });
 
@@ -111,6 +116,7 @@ test("production redirects the old hosts to the canonical domain", async () => {
     assert.equal(response.statusCode, 308);
     assert.equal(response.headers.location,
       "https://shxin.blog/the-first-thing/?from=old");
+    assert.equal(response.headers["cache-control"], "public, max-age=31536000");
     response.resume();
   }
 
@@ -337,12 +343,56 @@ test("편집기 페이지는 dev 빌드에만 선다", async () => {
   assert.equal((await fetch(base + "/write/")).status, 404);
 });
 
+test("참고문헌 편집기와 코드는 개발 빌드에만 선다", async () => {
+  const response = await fetch(devBase + "/write/refs/");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /refs\.bib/);
+  assert.match(html, /class="write-text refs-text"/);
+  assert.match(html, /src="\/refs-editor\.js"/);
+  assert.equal((await fetch(devBase + "/refs-editor.js")).status, 200);
+  assert.equal((await fetch(base + "/write/refs/")).status, 404);
+  assert.equal((await fetch(base + "/refs-editor.js")).status, 404);
+});
+
+test("참고문헌 원본을 읽고 저장하며 오래된 버전은 덮어쓰지 않는다", async () => {
+  const first = await fetch(devBase + "/api/refs");
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get("cache-control"), "no-store");
+  const original = await first.json();
+  assert.equal(original.source, "@misc{initial, title={Initial}}\n");
+
+  const source = "@book{updated, title={Updated}}\n";
+  const savedResponse = await post("/api/refs", {
+    source,
+    version: original.version,
+  });
+  assert.equal(savedResponse.status, 200);
+  const saved = await savedResponse.json();
+  assert.notEqual(saved.version, original.version);
+  assert.equal(readFileSync(refsFile, "utf8"), source);
+
+  const stale = await post("/api/refs", {
+    source: "@misc{lost, title={Lost}}\n",
+    version: original.version,
+  });
+  assert.equal(stale.status, 409);
+  assert.equal(readFileSync(refsFile, "utf8"), source);
+});
+
+test("운영 서버는 참고문헌 API를 열지 않는다", async () => {
+  assert.equal((await fetch(base + "/api/refs")).status, 404);
+  const response = await post("/api/refs", { source: "", version: "" }, base);
+  assert.equal(response.status, 405);
+});
+
 test("나가는 서버에는 편집기 경로가 없다", async () => {
   for (const path of ["/api/render", "/api/draft"]) {
     const response = await post(path, { source: "x" }, base);
     assert.equal(response.status, 405);
     assert.equal(response.headers.get("allow"), "GET, HEAD");
   }
+  assert.equal((await fetch(base + "/api/draft?slug=x")).status, 404);
 });
 
 test("원고가 실제 글과 같은 조판으로 돌아온다", async () => {
@@ -439,6 +489,66 @@ test("이름이 어떻든 draft/ 밖으로는 쓰지 않는다", async () => {
     "saved-here.md",
     "x.md",
   ]);
+});
+
+test("저장한 원고를 불러온다", async () => {
+  const source = "---\ntitle: 불러오기 시험\ndate: 2026-09-11\n---\n\n본문.\n";
+  await post("/api/draft", { slug: "loaded-here", source });
+  const answer = await (await fetch(devBase + "/api/draft?slug=loaded-here")).json();
+  assert.equal(answer.ok, true);
+  assert.equal(answer.slug, "loaded-here");
+  assert.equal(answer.draft, true);
+  assert.match(answer.path, /\/loaded-here\.md$/);
+  assert.equal(answer.source, source);
+});
+
+test("draft에 없으면 posts에서 불러오고, 있으면 draft가 앞선다", async () => {
+  const fromPosts = await (
+    await fetch(devBase + "/api/draft?slug=the-first-thing")
+  ).json();
+  assert.equal(fromPosts.ok, true);
+  assert.equal(fromPosts.slug, "the-first-thing");
+  assert.equal(fromPosts.draft, false);
+  assert.match(fromPosts.path, /posts\/the-first-thing\.md$/);
+  assert.equal(
+    fromPosts.source,
+    readFileSync(join(root, "posts", "the-first-thing.md"), "utf8"),
+  );
+
+  const source = "---\ntitle: 초안\n---\n\n초안 본문.\n";
+  await post("/api/draft", { slug: "the-first-thing", source });
+  const fromDraft = await (
+    await fetch(devBase + "/api/draft?slug=the-first-thing")
+  ).json();
+  assert.equal(fromDraft.ok, true);
+  assert.equal(fromDraft.draft, true);
+  assert.equal(fromDraft.source, source);
+});
+
+test("없는 원고는 불러오지 않는다", async () => {
+  const response = await fetch(devBase + "/api/draft?slug=no-such-draft");
+  assert.equal(response.status, 404);
+  assert.equal((await response.json()).ok, false);
+});
+
+test("이름 없는 불러오기는 하지 않는다", async () => {
+  for (const query of ["", "?slug=", "?slug=%20%20%20"]) {
+    const response = await fetch(devBase + "/api/draft" + query);
+    assert.equal(response.status, 400, query || "(없음)");
+    assert.equal((await response.json()).ok, false);
+  }
+});
+
+test("이름이 어떻든 그 자리 밖을 읽지 않는다", async () => {
+  for (const slug of ["../../etc/passwd", "/etc/passwd", "a/b"]) {
+    const response = await fetch(
+      devBase + "/api/draft?slug=" + encodeURIComponent(slug),
+    );
+    const answer = await response.json();
+    assert.ok(response.status === 200 || response.status === 404, slug);
+    assert.doesNotMatch(answer.slug || "", /[/\\]/, `${slug} → ${answer.slug}`);
+    if (answer.ok) assert.match(answer.path, new RegExp(`${answer.slug}\\.md$`));
+  }
 });
 
 test("원고가 글이 아니면 쓰지 않는다", async () => {

@@ -4,7 +4,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { GROUPS, plain, STARTER, writePage } from "../site/editor.mjs";
+import { GROUPS, plain, refsPage, STARTER, writePage } from "../site/editor.mjs";
 import { parseBib } from "../render/bib.mjs";
 import { imageSize } from "../render/image.mjs";
 import { frontmatter, renderDocument } from "../render/index.mjs";
@@ -151,18 +151,42 @@ test("새 글 앞머리가 빌드가 읽는 꼴이다", () => {
   assert.ok(data.slug);
   assert.ok(data.description);
   assert.notEqual(body.trim(), "");
+  // 기본 양식에는 주소를 직접 고를 때 쓰는 slug가 보인다.
+  for (const key of [
+    "title",
+    "date",
+    "category",
+    "categorySlug",
+    "slug",
+    "description",
+    "keywords",
+    "series",
+    "seriesSlug",
+  ])
+    assert.ok(Object.hasOwn(data, key), `${key}가 없다`);
+  for (const key of ["part", "readme", "fold", "bib"])
+    assert.equal(Object.hasOwn(data, key), false, `${key}는 slug가 아니다`);
 });
 
 test("페이지가 제 조각을 다 담는다", () => {
   const html = writePage();
+  assert.match(html, /href="\/write\/refs\/"/);
   assert.match(html, /<textarea class="write-text"/);
   assert.match(html, /class="write-slug"/);
+  assert.match(html, /class="write-load"/);
   assert.match(html, /class="write-save"/);
   assert.match(html, /class="write-preview"/);
   for (const group of GROUPS) assert.ok(html.includes(group.name), group.name);
   // 버튼 하나에 자리 번호 하나.
   const buttons = [...html.matchAll(/data-at="(\d+)\.(\d+)"/g)];
   assert.equal(buttons.length, items.length);
+});
+
+test("참고문헌 편집 페이지에 원본 칸과 저장 버튼이 있다", () => {
+  const html = refsPage();
+  assert.match(html, /class="write-text refs-text"/);
+  assert.match(html, /class="refs-save"/);
+  assert.match(html, /href="\/write\/"/);
 });
 
 test("내려보내는 조각이 팔레트와 같다", () => {

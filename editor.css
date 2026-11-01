@@ -93,6 +93,7 @@ main.paper:has(.write) footer {
 .write-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
   font:
@@ -114,7 +115,8 @@ main.paper:has(.write) footer {
   font: inherit;
   font-family: var(--mono);
 }
-.write-bar button {
+.write-bar button,
+.refs-edit-bar button {
   border: 1px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
@@ -123,9 +125,15 @@ main.paper:has(.write) footer {
   font: inherit;
 }
 .write-bar button:hover,
-.write-bar button:focus-visible {
+.write-bar button:focus-visible,
+.refs-edit-bar button:hover,
+.refs-edit-bar button:focus-visible {
   background: var(--ink);
   color: var(--paper);
+}
+.write-refs {
+  color: var(--ink);
+  white-space: nowrap;
 }
 .write-text {
   flex: 1;
@@ -213,6 +221,35 @@ main.paper:has(.write) footer {
   color: var(--ink);
   font-weight: bold;
   content: "오류";
+}
+
+/* BibTeX 원본은 글 조판 대신 넓은 입력칸 하나에 그대로 보여 준다. */
+.refs-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: calc(100dvh - 220px);
+}
+.refs-edit-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.refs-edit-bar h1 {
+  margin: 0 auto 0 0;
+  font-size: 24px;
+}
+.refs-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.refs-text {
+  min-height: 55vh;
+}
+.refs-status {
+  min-height: 2em;
 }
 
 /* 좁은 화면에서는 한 칸으로 접는다. 팔레트가 위로 올라오고, 원고와

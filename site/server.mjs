@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize, relative, resolve, sep } from "node:path";
 import { pipeline } from "node:stream";
@@ -147,6 +148,8 @@ async function loadEditor() {
     slugify: render.slugify,
     // 원고를 둘 자리. 빌드가 읽는 자리와 같아야 저장한 글이 미리보기에 선다.
     draftDir: resolve(process.cwd(), process.env.DRAFT_DIR || "draft"),
+    postsDir: resolve(process.cwd(), process.env.POSTS_DIR || "posts"),
+    refsFile: resolve(process.cwd(), process.env.REFS_FILE || "refs.bib"),
   };
 }
 
@@ -282,25 +285,80 @@ async function preview(source) {
   };
 }
 
-/** 원고를 draft/에 쓴다. 이름은 우리가 정한 꼴로만 받는다. */
-async function saveDraft({ slug, source }) {
+/** 파일 이름에 쓸 slug. 비었거나 다듬고 나면 남는 글자가 없으면 막는다. */
+function draftName(slug) {
   // slugify는 빈 글자에 "uncategorized"를 돌려준다. 이름이 비었는데 그
   // 이름으로 파일이 생기면 안 되므로, 다듬기 전에 먼저 막는다.
   if (!String(slug ?? "").trim())
     throw { status: 400, message: "이름(slug)이 비었다" };
   // 다듬은 이름만 받는다 — "../../etc/passwd"는 "etc-passwd"가 되고, 자리
-  // 구분자가 살아남지 않으므로 draft/ 밖을 가리킬 수 없다. 아래 검사는 그
+  // 구분자가 살아남지 않으므로 그 자리 밖을 가리킬 수 없다. 아래 검사는 그
   // 성질에 기대지 않는 두 번째 자물쇠다.
   const safe = editor.slugify(String(slug));
   if (!safe) throw { status: 400, message: "쓸 수 있는 이름이 아니다" };
-  const file = resolve(editor.draftDir, `${safe}.md`);
+  return safe;
+}
+
+function draftFile(dir, safe) {
+  const file = resolve(dir, `${safe}.md`);
   // 자리를 붙여 비교해야 "draft-backup"이 "draft"에 걸리지 않는다.
-  if (!file.startsWith(editor.draftDir + sep))
-    throw { status: 400, message: "draft/ 밖으로는 쓰지 않는다" };
+  if (!file.startsWith(dir + sep))
+    throw { status: 400, message: "그 자리 밖을 읽지 않는다" };
+  return file;
+}
+
+/** 원고를 draft/에 쓴다. 이름은 우리가 정한 꼴로만 받는다. */
+async function saveDraft({ slug, source }) {
+  const safe = draftName(slug);
+  const file = draftFile(editor.draftDir, safe);
   if (typeof source !== "string")
     throw { status: 400, message: "원고가 글이 아니다" };
   await writeFile(file, source, "utf8");
   return { path: `${relative(process.cwd(), file).split(sep).join("/")}`, slug: safe };
+}
+
+/** 초안을 먼저 보고, 없으면 posts/에서 읽는다. */
+async function loadDraft(slug) {
+  const safe = draftName(slug);
+  const candidates = [
+    { dir: editor.draftDir, draft: true },
+    { dir: editor.postsDir, draft: false },
+  ];
+  for (const { dir, draft } of candidates) {
+    const file = draftFile(dir, safe);
+    if (!existsSync(file)) continue;
+    return {
+      slug: safe,
+      source: await readFile(file, "utf8"),
+      draft,
+      path: relative(process.cwd(), file).split(sep).join("/"),
+    };
+  }
+  throw { status: 404, message: `${safe}.md가 없다` };
+}
+
+/** 개발 편집기가 읽고 쓰는 참고문헌 파일은 요청으로 고를 수 없다. */
+async function readRefs() {
+  let source;
+  try {
+    source = await readFile(editor.refsFile, "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    source = "";
+  }
+  return {
+    source,
+    version: createHash("sha256").update(source).digest("hex"),
+  };
+}
+
+async function saveRefs({ source, version }) {
+  if (typeof source !== "string" || typeof version !== "string")
+    throw { status: 400, message: "참고문헌 원본이나 버전이 없다" };
+  if ((await readRefs()).version !== version)
+    throw { status: 409, message: "refs.bib가 다른 곳에서 바뀌었다. 다시 불러와 확인한다" };
+  await writeFile(editor.refsFile, source, "utf8");
+  return { version: createHash("sha256").update(source).digest("hex") };
 }
 
 function cacheControl(file) {
@@ -391,19 +449,46 @@ createServer(async (request, response) => {
     response.writeHead(308, {
       ...SECURITY_HEADERS,
       Location: `https://shxin.blog${url.pathname}${url.search}`,
+      // 영구 이동이라 크롤러가 매번 다시 묻지 않게 한다. immutable은 붙이지
+      // 않는다 — 대표 주소가 바뀌면 이 응답도 바뀌어야 한다.
+      "Cache-Control": "public, max-age=31536000",
     });
     response.end();
     return;
   }
 
-  // 편집기의 두 경로. DEV가 아니면 이 자리가 통째로 없으므로, 나가는 서버는
-  // 지금까지와 똑같이 아래의 405로 떨어진다.
-  if (editor && request.method === "POST") {
-    const { pathname } = new URL(request.url, "http://localhost");
-    if (pathname === "/api/render" || pathname === "/api/draft") {
+  // 편집기의 경로. DEV가 아니면 이 자리가 통째로 없으므로, 나가는 서버는
+  // 지금까지와 똑같이 아래의 GET 404·POST 405로 떨어진다.
+  if (editor) {
+    const url = new URL(request.url, "http://localhost");
+    if (url.pathname === "/api/refs" && request.method === "GET") {
+      try {
+        sendJson(response, 200, { ok: true, ...(await readRefs()) });
+      } catch (error) {
+        sendJson(response, 500, { ok: false, message: error?.message || "실패" });
+      }
+      return;
+    }
+    if (url.pathname === "/api/draft" && request.method === "GET") {
+      try {
+        sendJson(response, 200, {
+          ok: true,
+          ...(await loadDraft(url.searchParams.get("slug"))),
+        });
+      } catch (error) {
+        const status = Number(error?.status) || 500;
+        sendJson(response, status, { ok: false, message: error?.message || "실패" });
+      }
+      return;
+    }
+    if (
+      request.method === "POST" &&
+      (url.pathname === "/api/render" || url.pathname === "/api/draft" ||
+        url.pathname === "/api/refs")
+    ) {
       try {
         const sent = await readJson(request);
-        if (pathname === "/api/render") {
+        if (url.pathname === "/api/render") {
           // 원고는 늘 반쪽인 순간을 지난다. 그 순간마다 500이 오면 화면이
           // 깜빡이므로, 무엇이 터지든 200에 담아 보내고 클라이언트가 마지막
           // 성공 화면을 유지하게 한다.
@@ -412,8 +497,10 @@ createServer(async (request, response) => {
           } catch (error) {
             sendJson(response, 200, { ok: false, message: String(error?.message || error) });
           }
-        } else {
+        } else if (url.pathname === "/api/draft") {
           sendJson(response, 200, { ok: true, ...(await saveDraft(sent)) });
+        } else {
+          sendJson(response, 200, { ok: true, ...(await saveRefs(sent)) });
         }
       } catch (error) {
         const status = Number(error?.status) || 500;

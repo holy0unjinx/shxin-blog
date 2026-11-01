@@ -16,16 +16,19 @@ const CARET = "$0";
 /**
  * 새 글의 앞머리.
  *
- * 빌드가 읽는 열쇠를 다 적어 둔다. 지우는 것이 채우는 것보다 쉽고, 무엇을
- * 적을 수 있는지가 여기 말고는 SYNTAX.md에만 있다.
+ * 새 글에 필요한 값과 주소를 직접 고를 때 쓰는 slug만 적어 둔다.
+ * 그 밖의 선택 항목은 필요한 글에만 더한다.
  */
 export const STARTER = `---
 title: "제목"
 date: ${new Date().toISOString().slice(0, 10)}
 category: 분류
+categorySlug:
 slug: new-post
 description: "한 줄 요약."
 keywords: 키워드, 둘
+series:
+seriesSlug:
 ---
 
 여기서부터 씁니다.
@@ -560,6 +563,8 @@ export function writePage() {
     `<section class="write-source">` +
     `<div class="write-bar">` +
     `<label>draft/<input class="write-slug" type="text" spellcheck="false" placeholder="new-post">.md</label>` +
+    `<a class="write-refs" href="/write/refs/">refs.bib 편집</a>` +
+    `<button type="button" class="write-load">불러오기</button>` +
     `<button type="button" class="write-save">저장</button>` +
     `<button type="button" class="write-new">새 글</button>` +
     `</div>` +
@@ -569,5 +574,19 @@ export function writePage() {
     `<p class="write-status" role="status"></p>` +
     `<script type="application/json" class="write-snippets">${safeJson(data)}</script>` +
     `</div>`
+  );
+}
+
+/** 개발 서버에서만 내보내는 참고문헌 원본 편집 페이지. */
+export function refsPage() {
+  return (
+    `<section class="refs-edit">` +
+    `<div class="refs-edit-bar"><a href="/write/">← 글 쓰기</a>` +
+    `<h1>refs.bib</h1><button type="button" class="refs-reload">다시 불러오기</button>` +
+    `<button type="button" class="refs-save">저장</button></div>` +
+    `<p class="refs-help">BibTeX 항목의 키는 글에서 <code>[@키]</code>로 부릅니다.</p>` +
+    `<textarea class="write-text refs-text" spellcheck="false" aria-label="refs.bib 원본"></textarea>` +
+    `<p class="refs-status" role="status"></p>` +
+    `</section>`
   );
 }
