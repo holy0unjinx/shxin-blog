@@ -13,8 +13,45 @@ const HEIGHT = 630;
 const MARGIN = 84;
 const TITLE = 68;
 const LABEL = 24;
+const OLD_JAMO = /[\u1100-\u11ff\ua960-\ua97f\ud7b0-\ud7ff]/u;
+const graphemes = new Intl.Segmenter("ko", { granularity: "grapheme" });
 
 const n = (value) => String(Math.round(value * 100) / 100);
+
+// 공유 PNG를 굽는 resvg는 한 <text> 안의 글꼴 대체에 옛한글 조합을
+// 적용하지 않는다. 옛 음절만 별도의 <text>로 그려 같은 폰트에서 조합한다.
+function runs(value) {
+  const result = [];
+  for (const { segment } of graphemes.segment(String(value))) {
+    const old = OLD_JAMO.test(segment);
+    if (result.at(-1)?.old === old) result.at(-1).text += segment;
+    else result.push({ old, text: segment });
+  }
+  return result;
+}
+
+function runWidth(run, size) {
+  if (run.old) return [...graphemes.segment(run.text)].length * size;
+  // textWidth의 8% 여유는 줄바꿈에는 필요하지만 이어지는 두 글꼴
+  // 사이에는 빈틈이 된다.
+  return textWidth(run.text, size) / 1.08;
+}
+
+function cardText(value, x, y, size, attributes = "", end = false) {
+  const chunks = runs(value);
+  if (!chunks.some((part) => part.old))
+    return `<text x="${n(x)}" y="${n(y)}" font-size="${size}"${end ? ' text-anchor="end"' : ""}${attributes}>${esc(value)}</text>`;
+  let at = end ? x - chunks.reduce((sum, part) => sum + runWidth(part, size), 0) : x;
+  return chunks.map((part) => {
+    const svg = `<text x="${n(at)}" y="${n(y)}" font-size="${size}"${attributes}${part.old ? ' font-family="Noto Serif CJK KR"' : ""}>${esc(part.text)}</text>`;
+    at += runWidth(part, size);
+    return svg;
+  }).join("");
+}
+
+function titleWidth(value, size) {
+  return runs(value).reduce((sum, part) => sum + runWidth(part, size), 0) * 1.08;
+}
 
 // The title is wrapped by measure, and cut off with an ellipsis rather than
 // shrunk: a card whose type size depends on the length of the title makes two
@@ -25,7 +62,7 @@ export function wrapTitle(title, { width = WIDTH - MARGIN * 2, size = TITLE, lin
   let line = "";
   for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
-    if (line && textWidth(candidate, size) > width) {
+    if (line && titleWidth(candidate, size) > width) {
       lines.push(line);
       line = word;
     } else line = candidate;
@@ -64,21 +101,21 @@ export function ogCard(post, { siteName = "shxin.blog" } = {}) {
     // 위아래 두 줄. 종이 위의 논문이라는 조판을 카드에서도 지킨다.
     `<rect x="${MARGIN}" y="${MARGIN - 34}" width="${WIDTH - MARGIN * 2}" height="2" fill="#000"/>` +
     `<g font-family="CMU Serif, 신명조, Times New Roman, serif" fill="#000">` +
-    `<text x="${MARGIN}" y="${MARGIN}" font-size="${LABEL}" letter-spacing="1">${esc(siteName)}</text>` +
+    cardText(siteName, MARGIN, MARGIN, LABEL, ' letter-spacing="1"') +
     (label
-      ? `<text x="${WIDTH - MARGIN}" y="${MARGIN}" font-size="${LABEL}" text-anchor="end" fill="#555">${esc(label)}</text>`
+      ? cardText(label, WIDTH - MARGIN, MARGIN, LABEL, ' fill="#555"', true)
       : "") +
     (series
-      ? `<text x="${MARGIN}" y="${n(firstBaseline - step * 0.9)}" font-size="${LABEL + 4}" fill="#555">${esc(series)}</text>`
+      ? cardText(series, MARGIN, firstBaseline - step * 0.9, LABEL + 4, ' fill="#555"')
       : "") +
     title
       .map(
         (line, index) =>
-          `<text x="${MARGIN}" y="${n(firstBaseline + index * step)}" font-size="${TITLE}" font-weight="700">${esc(line)}</text>`,
+          cardText(line, MARGIN, firstBaseline + index * step, TITLE, ' font-weight="700"'),
       )
       .join("") +
     (keywords
-      ? `<text x="${MARGIN}" y="${HEIGHT - MARGIN + 6}" font-size="${LABEL}" fill="#555">${esc(keywords)}</text>`
+      ? cardText(keywords, MARGIN, HEIGHT - MARGIN + 6, LABEL, ' fill="#555"')
       : "") +
     `</g></svg>`
   );

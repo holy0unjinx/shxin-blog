@@ -44,6 +44,12 @@ test("a card carries the title, the category and the date", () => {
   assert.match(svg, />shxin\.blog</);
 });
 
+test("옛한글 음절은 공유 카드에서 한 글꼴로 조합한다", () => {
+  const svg = ogCard({ title: "중세국어 ᄒᆞᆫ글" });
+  assert.match(svg, /font-family="Noto Serif CJK KR">ᄒᆞᆫ<\/text>/);
+  assert.match(svg, />글<\/text>/);
+});
+
 test("a card names the series when the post is in one", () => {
   const svg = ogCard({ title: "둘", series: "사설 CA 세우기" });
   assert.match(svg, />사설 CA 세우기</);

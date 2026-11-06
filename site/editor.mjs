@@ -10,6 +10,7 @@
 // 부르는 쪽이 있어야 서고, [toc:fig]는 목록에 오를 그림이 있어야 찬다.
 
 import { esc } from "../render/index.mjs";
+import { OLD_HANGUL_KEYS, OLD_HANGUL_FINALS } from "./old-hangul.mjs";
 
 const CARET = "$0";
 
@@ -543,6 +544,9 @@ export function writePage() {
         .join("") +
       "</div></details>",
   ).join("");
+  const oldHangul = (items) => items.map((item, index) =>
+    `<button type="button" data-old="${index}" title="${esc(item.title)}" aria-label="${esc(item.title)}">${esc(item.label)}</button>`,
+  ).join("");
 
   // 조각도 새 글 앞머리도 JSON 한 덩이로 내려간다. 줄바꿈이 든 글을 HTML
   // 속성에 우겨넣지 않아도 되고, 버튼은 자리 번호만 지면 된다.
@@ -559,7 +563,13 @@ export function writePage() {
 
   return (
     `<div class="write">` +
-    `<aside class="write-rail"><p class="write-rail-head">문법</p>${rail}</aside>` +
+    `<aside class="write-rail"><p class="write-rail-head">문법</p>${rail}` +
+    `<details class="write-group write-old-hangul"><summary>옛한글</summary>` +
+    `<p>평소에는 한글 입력기를 그대로 쓴다. 음절 뒤에서 모음·받침을 바꾸거나, 음절 하나를 선택해 초성을 바꾼다.</p>` +
+    `<div>${oldHangul(OLD_HANGUL_KEYS)}</div>` +
+    `<details class="write-old-finals"><summary>현대 받침</summary><div>${OLD_HANGUL_FINALS.map((item, index) =>
+      `<button type="button" data-final="${index}" title="${esc(item.title)}">${esc(item.label)}</button>`,
+    ).join("")}</div></details></details></aside>` +
     `<section class="write-source">` +
     `<div class="write-bar">` +
     `<label>draft/<input class="write-slug" type="text" spellcheck="false" placeholder="new-post">.md</label>` +

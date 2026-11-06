@@ -104,6 +104,17 @@ test("serves the home page with security headers", async () => {
   assert.match(await response.text(), /<header class="site-head">/);
 });
 
+test("옛한글 편집기 모듈은 개발 서버에서 자바스크립트로 나간다", async () => {
+  const page = await fetch(devBase + "/write/");
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /<script type="module" src="\/editor\.js"><\/script>/);
+  const module = await fetch(devBase + "/old-hangul.mjs");
+  assert.equal(module.status, 200);
+  assert.match(module.headers.get("content-type"), /text\/javascript/);
+  assert.match(await module.text(), /insertOldHangul/);
+  assert.equal((await fetch(base + "/old-hangul.mjs")).status, 404);
+});
+
 test("production redirects the old hosts to the canonical domain", async () => {
   for (const host of ["blog.shxin.kr", "www.shxin.blog"]) {
     const response = await new Promise((resolve, reject) => {

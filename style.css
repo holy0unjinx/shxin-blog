@@ -179,6 +179,25 @@
    글은 그 중 일부일 뿐이다. unicode-range가 서로 겹치지 않으므로 브라우저는
    페이지에 실제로 나온 글자가 든 쪽만 받는다. 여기 적은 범위와
    tools/split-font.sh에 적은 범위는 반드시 같아야 한다. */
+/* 옛한글의 초·중·종성은 한 글꼴에서 함께 조합해야 한다. */
+@font-face {
+  font-family: "옛한글 명조";
+  src: url("fonts/noto-serif-old-hangul.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  unicode-range: U+1100-11FF, U+A960-A97F, U+D7B0-D7FF, U+302E-302F;
+}
+/* 신명조에서 윤곽선이 빈 현대 음절은 cmap에서도 빼 두었다. 그런 음절만
+   이 서브셋으로 떨어진다. 신명조에 있는 음절은 기존 글꼴로 남는다. */
+@font-face {
+  font-family: "신명조 대체";
+  src: url("fonts/noto-serif-missing-hangul.woff2") format("woff2");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+  unicode-range: U+AC00-D7A3;
+}
 @font-face {
   font-family: "신명조";
   src: url("fonts/sm-base.woff2") format("woff2");
@@ -307,13 +326,13 @@
 :root {
   /* 영문은 CMU Serif, 한글은 신명조. 뒤쪽은 웹폰트 로드 실패 시 대체 글꼴이다. */
   --serif:
-    "CMU Serif", "Times New Roman", Times, "신명조", "조선신명조", "바탕", "Batang",
+    "CMU Serif", "옛한글 명조", "Times New Roman", Times, "신명조", "신명조 대체", "조선신명조", "바탕", "Batang",
     serif;
   /* 코드 글꼴 한 벌. 한글은 위 unicode-range 때문에 Geist Mono를 지나쳐
      Pretendard로 떨어진다. 웹폰트가 못 뜬 경우를 대비해 뒤에 시스템
      고정폭을 남긴다. */
   --mono:
-    "Geist Mono", "Pretendard Code", "Pretendard", "Consolas", "Courier New",
+    "Geist Mono", "옛한글 명조", "Pretendard Code", "Pretendard", "Consolas", "Courier New",
     monospace;
   /* 간격 사다리. 이 종이가 쓰는 여백은 여기 아홉 단 중 하나다 — 자리마다
      눈으로 고른 값이 흩어져 있으면 무엇이 의도이고 무엇이 사고인지 알 수

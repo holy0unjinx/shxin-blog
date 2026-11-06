@@ -7,7 +7,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
@@ -182,6 +182,40 @@ before(() => {
     },
   });
   assert.equal(devBuild.status, 0, devBuild.stderr);
+});
+
+test("빌드 도중에도 내보낼 자리가 비지 않는다", async () => {
+  const live = mkdtempSync(join(tmpdir(), "shxin-live-"));
+  writeFileSync(join(live, "index.html"), "alive");
+  const child = spawn(process.execPath, ["site/build.mjs"], {
+    cwd: root,
+    env: { ...process.env, OUT_DIR: live, SITE_URL: "https://example.test" },
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  let gap = false;
+  const timer = setInterval(() => {
+    const serving =
+      existsSync(join(live, "index.html")) ||
+      existsSync(join(`${live}.prev`, "index.html"));
+    if (!serving) gap = true;
+  }, 10);
+  let code = 1;
+  let stderr = "";
+  try {
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    code = await new Promise((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", resolve);
+    });
+  } finally {
+    clearInterval(timer);
+    for (const dir of [live, `${live}.next`, `${live}.prev`, `${live}.lock`])
+      rmSync(dir, { recursive: true, force: true });
+  }
+  assert.equal(code, 0, stderr);
+  assert.equal(gap, false);
 });
 
 after(() => {
@@ -510,10 +544,12 @@ test("the font ships in two parts, each named after its contents", () => {
   const fonts = readdirSync(join(dist, "fonts"));
   const base = fonts.find((name) => /^sm-base\.[0-9a-f]{8}\.woff2$/.test(name));
   const han = fonts.find((name) => /^sm-han\.[0-9a-f]{8}\.woff2$/.test(name));
+  const fallback = fonts.find((name) => /^noto-serif-missing-hangul\.[0-9a-f]{8}\.woff2$/.test(name));
   assert.ok(base, `base 글꼴이 없다: ${fonts.join(", ")}`);
   assert.ok(han, `한자 글꼴이 없다: ${fonts.join(", ")}`);
+  assert.ok(fallback, `빈 글리프 대체 글꼴이 없다: ${fonts.join(", ")}`);
   const size = (name) => readFileSync(join(dist, "fonts", name)).length;
-  assert.ok(size(base) > 0 && size(han) > 0);
+  assert.ok(size(base) > 0 && size(han) > 0 && size(fallback) > 0);
   // 미리 받는 것은 어느 글에나 쓰이는 쪽뿐이다.
   const html = read("index.html");
   assert.match(html, new RegExp(`rel="preload"[\\s\\S]*?fonts/${base}`));
@@ -523,6 +559,8 @@ test("the font ships in two parts, each named after its contents", () => {
   const styles = readFileSync(join(dist, css), "utf8");
   assert.match(styles, new RegExp(`url\\("fonts/${base}"\\)`));
   assert.match(styles, new RegExp(`url\\("fonts/${han}"\\)`));
+  assert.match(styles, new RegExp(`url\\("fonts/${fallback}"\\)`));
+  assert.match(styles, /"신명조",\s*"신명조 대체"/);
   assert.doesNotMatch(styles, /sm-base\.woff2/, "지문 없는 주소가 남았다");
 });
 
@@ -554,11 +592,13 @@ test("본문 로마자 글꼴이 굵기와 범위로 갈려 나간다", () => {
     );
 });
 
-test("본문 스택은 CMU Serif가 앞서고 Times New Roman이 뒤를 받는다", () => {
+test("본문 스택은 CMU Serif와 옛한글 글꼴을 앞세운다", () => {
   const css = readdirSync(dist).find((name) => /^style\./.test(name));
   const styles = readFileSync(join(dist, css), "utf8");
   // 영문 본문은 CMU Serif를 우선 사용한다.
-  assert.match(styles, /--serif:\s*"CMU Serif",\s*"Times New Roman"/);
+  assert.match(styles, /--serif:\s*"CMU Serif",\s*"옛한글 명조",\s*"Times New Roman"/);
+  assert.match(styles, /font-family:"옛한글 명조";src:url\("fonts\/noto-serif-old-hangul\.[0-9a-f]{8}\.woff2"\)/);
+  assert.match(styles, /unicode-range:U\+1100-11FF,U\+A960-A97F,U\+D7B0-D7FF,U\+302E-302F/);
 });
 
 // unicode-range 하나를 코드 점 집합으로 편다. "U+0100-0130"과 "U+0131" 두
@@ -785,7 +825,7 @@ test("the day a post was fixed stands beside the day it was written", () => {
 // ── dev 전용 편집기 ─────────────────────────────────────────
 
 test("나가는 빌드에는 편집기가 없다", () => {
-  for (const path of ["write/index.html", "editor.js", "editor.css"])
+  for (const path of ["write/index.html", "editor.js", "editor.css", "old-hangul.mjs"])
     assert.equal(existsSync(join(dist, path)), false, path);
 });
 
@@ -793,12 +833,13 @@ test("DEV 빌드에는 편집기가 선다", () => {
   const html = readDev("write/index.html");
   assert.match(html, /<textarea class="write-text"/);
   assert.match(html, /<link rel="stylesheet" href="\/editor\.css">/);
-  assert.match(html, /<script defer src="\/editor\.js"><\/script>/);
+  assert.match(html, /<script type="module" src="\/editor\.js"><\/script>/);
   // 페이지의 나머지는 여느 페이지와 같다 — 지문 붙은 style.css와 app.js,
   // 머리글과 바닥글.
   assert.match(html, /<header class="site-head">/);
   assert.match(html, /href="\/style\.[0-9a-f]{8}\.css"/);
   assert.ok(existsSync(join(devDist, "editor.js")));
+  assert.ok(existsSync(join(devDist, "old-hangul.mjs")));
   assert.ok(existsSync(join(devDist, "editor.css")));
   // 편집기에서는 언제든 수식을 칠 수 있으므로, 글에 수식이 없어도 KaTeX가
   // 나간다.

@@ -29,6 +29,8 @@ npm run lint      # 빌드하면서 콘텐츠를 점검하고, 오류가 있으�
 
 `npm run dev`로 띄운 서버에는 `http://localhost:8002/write/`에 편집기가 있습니다. 왼쪽에 문법 삽입 팔레트, 가운데 원고, 오른쪽에 실시간 미리보기가 섭니다.
 
+옛한글은 왼쪽 **옛한글** 팔레트에서 넣습니다. 평소 현대 한글은 그대로 입력하고, 음절 뒤에서 `ㆍ` 같은 모음을 누르면 그 음절의 모음만 바뀝니다. 음절 하나를 선택하고 `ㅿ 초성`을 누르면 첫소리가 바뀝니다. 옛 모음 뒤의 현대 받침은 **현대 받침**에서 고릅니다. 별도 입력 모드나 마크다운 문법은 없습니다.
+
 미리보기는 브라우저가 그리지 않습니다. 원고를 서버로 보내면 서버가 **빌드와 같은 함수**로 조판해 돌려줍니다 — `data/*.csv`를 읽고, 그림 크기를 재고, 수식을 KaTeX로 굽고, `postPage()`로 글 머리와 목차까지 세우는 일이 전부 빌드와 같은 자리에서 일어납니다. 그래서 미리보기와 실제로 나갈 글이 어긋날 수 없고, 화면 아래 lint 줄도 `npm run lint`가 내는 것과 같은 결과입니다.
 
 팔레트의 항목은 `SYNTAX.md`가 적어 둔 문법 전부를 덮습니다. 누르면 커서 자리에 예제 골격이 들어가고, 블록 문법은 앞뒤로 빈 줄을 알아서 확보합니다. `site/editor.mjs`가 그 목록이고, 시험이 조각 하나하나를 실제로 렌더해 보므로 문법이 바뀌었는데 팔레트가 그대로면 `npm test`가 깨집니다.
@@ -245,7 +247,7 @@ node tools/theme.mjs --write  # style.css의 표시 사이를 갈아 끼운다
 
 ## 글꼴
 
-본문 로마자는 CMU Serif, 한글은 신명조입니다. 둘 다 `dist/`에서 나가므로 어느 페이지도 남의 서버에 글꼴을 청하지 않습니다.
+본문 로마자는 CMU Serif, 현대 한글은 신명조입니다. 신명조에서 윤곽선이 빈 현대 음절과 옛한글 조합 자모·방점은 Noto Serif CJK KR의 별도 웹폰트가 맡습니다. 모두 `dist/`에서 나가므로 어느 페이지도 남의 서버에 글꼴을 청하지 않습니다.
 
 CMU Serif는 Computer Modern의 유니코드판이며 SIL Open Font License로 배포됩니다. 출처는 [CTAN](https://www.ctan.org/tex-archive/fonts/cm-unicode)이고 라이선스는 `fonts/cmu-OFL.txt`에 있습니다. `--serif`는 CMU Serif를 우선 사용하고 Times New Roman을 대체 글꼴로 둡니다. 네 벌(보통·굵게·기울임·굵은 기울임)이 각자 제 파일을 가지므로 브라우저가 굵기나 기울기를 흉내 낼 일이 없고, 굵은 글씨가 없는 글은 그 파일을 받지 않습니다. 라틴 확장은 `unicode-range`가 달라 그 글자가 실제로 나오는 글에서만 내려옵니다.
 
@@ -260,14 +262,15 @@ CMU Serif는 Computer Modern의 유니코드판이며 SIL Open Font License로 �
 
 | 파일 | 담는 것 | 크기 |
 |---|---|---|
-| `fonts/sm-base.woff2` | 화살표, 한글 음절, 호환 자모, 가나, 중일한 부호, 전각·반각 | 254 KB |
+| `fonts/sm-base.woff2` | 화살표, 윤곽선이 있는 한글 음절, 호환 자모, 가나, 중일한 부호, 전각·반각 | 약 258 KB |
 | `fonts/sm-han.woff2` | 한자, 한자 호환 | 1369 KB |
+| `fonts/noto-serif-missing-hangul.woff2` | 신명조에서 윤곽선이 빈 현대 한글 음절만 | 약 2 MB |
 
 `index.html`이 미리 받는 것은 `sm-base`와 `cmu-regular` 둘뿐입니다 — 어느 글에나 나오는 몫입니다. 한자가 나오는 글에서만 `sm-han`이, 굵은 글씨가 있는 글에서만 `cmu-bold`가 내려옵니다. 글꼴에 아예 없는 문자(아랍 문자, 데바나가리 등)는 `--serif` 스택의 뒤쪽, 즉 시스템 글꼴이 맡습니다.
 
 쓰인 글자만 남기는 방식은 쓰지 않습니다. 그렇게 하면 새 글에 처음 나온 글자가 조용히 시스템 글꼴로 떨어집니다.
 
-글꼴을 바꿨을 때는 `tools/split-font.sh`(한글)와 `tools/serif-font.sh`(로마자)를 돌려 다시 만듭니다. `serif-font.sh`는 CMU Serif 원본 OTF가 없으면 CTAN에서 내려받습니다. 원본은 빌드에 필요하지 않아 Git에서 제외하고, 생성한 WOFF2와 라이선스를 보관합니다. `fonttools`가 필요하고(`pip install fonttools brotli`), 배포 이미지에는 파이썬이 없으므로 결과물을 저장소에 넣습니다. 범위를 고칠 때는 `style.css`의 `@font-face`와 스크립트 양쪽을 같이 고쳐야 합니다.
+글꼴을 바꿨을 때는 `tools/split-font.sh`, `tools/old-hangul-font.sh`(한글), `tools/serif-font.sh`(로마자) 순서로 돌려 다시 만듭니다. `old-hangul-font.sh`는 신명조의 빈 글리프를 찾아 제외하고 Noto 대체 서브셋을 만듭니다. `serif-font.sh`는 CMU Serif 원본 OTF가 없으면 CTAN에서 내려받습니다. 원본은 빌드에 필요하지 않아 Git에서 제외하고, 생성한 WOFF2와 라이선스를 보관합니다. `fonttools`가 필요하고(`pip install fonttools brotli`), 배포 이미지에는 파이썬이 없으므로 결과물을 저장소에 넣습니다. 범위를 고칠 때는 `style.css`의 `@font-face`와 스크립트 양쪽을 같이 고쳐야 합니다.
 
 ## 배포본 최적화
 
@@ -426,6 +429,7 @@ fold: 2      # 2덩이까지 펼치고 나머지는 "더 보기"로 접는다
 `fonts/`의 글꼴 파일은 **이 라이선스가 덮지 않습니다.** 글꼴마다 제 라이선스를 그대로 지니며, 출처와 조건은 `NOTICE`에 정리해 두었습니다.
 
 - CMU Serif·Geist Mono·Pretendard는 SIL Open Font License 1.1이고, 라이선스 전문을 `fonts/`에 함께 둡니다.
+- 옛한글과 신명조의 빈 글리프를 보완하는 Noto Serif CJK KR 서브셋은 SIL Open Font License 1.1이며, 출처와 라이선스는 `NOTICE`와 `fonts/noto-serif-old-hangul-OFL.txt`에 있습니다. `tools/old-hangul-font.sh`로 다시 만들 수 있습니다.
 - **조선신명조(`sm-base.woff2`, `sm-han.woff2`)는 조선일보 전용서체 이용 조건을 따르며 OFL이 아닙니다.** 개인·기업에 무료로 제공되고 자유로운 배포를 허용하지만, 복사·배포의 대가 요구와 수정 후 판매를 금지하며 배포된 형태 그대로 사용하도록 명시합니다. 제공받은 라이선스 본문은 [fonts/chosun-LICENSE.txt](fonts/chosun-LICENSE.txt)에 보관합니다. 현재 파일은 `tools/split-font.sh`로 만든 WOFF2 서브셋이므로, 이 가공 형태의 허용 여부가 확인된 것으로 표기하지 않습니다.
 
 `posts/`와 `draft/`의 글은 저장소에 담지 않습니다(`.gitignore`). 코드만 공개하고 글은 각자의 기계에 둡니다.

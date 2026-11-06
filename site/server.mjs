@@ -15,6 +15,7 @@ const TYPES = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
@@ -33,6 +34,7 @@ const COMPRESSIBLE = new Set([
   ".css",
   ".html",
   ".js",
+  ".mjs",
   ".json",
   ".svg",
   ".txt",
@@ -378,7 +380,7 @@ function cacheControl(file) {
   if (/\.[0-9a-f]{8}\.(css|js)$/.test(relative))
     return "public, max-age=31536000, immutable";
   const extension = extname(file).toLowerCase();
-  if (extension === ".css" || extension === ".js")
+  if (extension === ".css" || extension === ".js" || extension === ".mjs")
     return "public, max-age=3600";
   return "no-cache";
 }
@@ -441,7 +443,7 @@ function send(request, response, status, file) {
   });
 }
 
-createServer(async (request, response) => {
+const server = createServer(async (request, response) => {
   // 예전 주소에서 들어온 요청은 경로와 검색 조건을 보존해 대표 도메인으로 보낸다.
   // 개발 서버는 별개로 접속하므로 이 규칙을 적용하지 않는다.
   if (!DEV && /^(?:blog\.shxin\.kr|www\.shxin\.blog)(?::\d+)?$/i.test(request.headers.host || "")) {
@@ -543,10 +545,31 @@ createServer(async (request, response) => {
     "Content-Type": "text/plain; charset=utf-8",
   });
   response.end("404 Not Found");
-}).listen(port, host, () => {
-  console.log(
-    `Paper Blog is running at http://localhost:${port}${
-      DEV ? ` (dev: no caching, 편집기 /write/)` : ""
-    }`,
-  );
 });
+
+function open() {
+  server.listen(port, host, () => {
+    console.log(
+      `Paper Blog is running at http://localhost:${port}${
+        DEV ? ` (dev: no caching, 편집기 /write/)` : ""
+      }`,
+    );
+  });
+}
+
+// dev에서는 직전 서버가 포트를 놓고 가는 중일 수 있다. 그때 죽으면
+// nodemon이 새 프로세스를 띄우기 전에 빈 응답만 남는다.
+let waitingForPort = false;
+server.on("error", (error) => {
+  if (DEV && error.code === "EADDRINUSE") {
+    if (!waitingForPort) {
+      console.error(`port ${port} is still taken — waiting for the previous server`);
+      waitingForPort = true;
+    }
+    setTimeout(open, 200);
+    return;
+  }
+  throw error;
+});
+
+open();

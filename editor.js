@@ -5,6 +5,8 @@
 // 파일을 읽고, 그림 크기를 재고, 수식을 굽는 일이 전부 빌드와 같은 자리에서
 // 일어나므로, 미리보기와 나갈 글이 어긋날 방법이 없다.
 
+import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangul.mjs";
+
 (() => {
   const root = document.querySelector(".write");
   if (!root) return;
@@ -98,6 +100,28 @@
       const chosen = groups[group]?.items[item];
       if (chosen) insert(chosen.snippet, chosen.block);
     });
+
+  // 현대 한글은 IME가 조합한다. 옛 자모 버튼을 누를 때만 커서 음절을
+  // 조합 자모로 바꾼다. 조합 중 버튼을 눌러도 IME의 미완성 글자를 훼손하지 않는다.
+  let composing = false;
+  text.addEventListener("compositionstart", () => { composing = true; });
+  text.addEventListener("compositionend", () => { composing = false; });
+  for (const [attribute, keys] of [
+    ["data-old", OLD_HANGUL_KEYS],
+    ["data-final", OLD_HANGUL_FINALS],
+  ])
+    for (const button of rail.querySelectorAll(`button[${attribute}]`))
+      button.addEventListener("click", () => {
+        if (composing) return;
+        const key = keys[Number(button.getAttribute(attribute))];
+        if (!key) return;
+        const result = insertOldHangul(text.value, text.selectionStart, text.selectionEnd, key);
+        text.value = result.value;
+        text.focus();
+        text.setSelectionRange(result.caret, result.caret);
+        schedule();
+        remember();
+      });
 
   // 늦게 온 응답이 최신 응답을 덮지 않게 한다. 빠르게 치면 요청 셋이 동시에
   // 날아 있고, 돌아오는 순서는 보낸 순서가 아니다.

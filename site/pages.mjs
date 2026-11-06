@@ -382,6 +382,7 @@ export function pageAssets({
   katexStyle = "",
   styles = [],
   scripts = [],
+  moduleScripts = [],
 } = {}) {
   const tags = [];
   if (math && katexStyle)
@@ -391,6 +392,7 @@ export function pageAssets({
   for (const href of styles)
     tags.push(`<link rel="stylesheet" href="${esc(href)}">`);
   for (const src of scripts) tags.push(`<script defer src="${esc(src)}"></script>`);
+  for (const src of moduleScripts) tags.push(`<script type="module" src="${esc(src)}"></script>`);
   return tags.join("");
 }
 

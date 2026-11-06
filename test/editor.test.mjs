@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 import { GROUPS, plain, refsPage, STARTER, writePage } from "../site/editor.mjs";
+import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "../site/old-hangul.mjs";
 import { parseBib } from "../render/bib.mjs";
 import { imageSize } from "../render/image.mjs";
 import { frontmatter, renderDocument } from "../render/index.mjs";
@@ -180,6 +181,46 @@ test("페이지가 제 조각을 다 담는다", () => {
   // 버튼 하나에 자리 번호 하나.
   const buttons = [...html.matchAll(/data-at="(\d+)\.(\d+)"/g)];
   assert.equal(buttons.length, items.length);
+  assert.match(html, /<summary>옛한글<\/summary>/);
+  assert.match(html, /data-old="0"/);
+  assert.match(html, /data-final="0"/);
+});
+
+test("현대 음절 한 글자만 옛 모음으로 바꾼다", () => {
+  const key = OLD_HANGUL_KEYS.find((item) => item.char === "ᆞ");
+  const source = "오늘 한글을 쓴다";
+  const at = source.indexOf("한") + 1;
+  const changed = insertOldHangul(source, at, at, key);
+  assert.equal(changed.value, "오늘 ᄒᆞᆫ글을 쓴다");
+  assert.equal(changed.value.slice(changed.caret), "글을 쓴다");
+});
+
+test("선택한 음절의 옛 초성과 옛 모음을 이어 조합한다", () => {
+  const oldInitial = OLD_HANGUL_KEYS.find((item) => item.char === "ᅀ");
+  const oldVowel = OLD_HANGUL_KEYS.find((item) => item.char === "ᆞ");
+  const first = insertOldHangul("하", 0, 1, oldInitial);
+  assert.equal(first.value, "ᅀᅡ");
+  const second = insertOldHangul(first.value, first.caret, first.caret, oldVowel);
+  assert.equal(second.value, "ᅀᆞ");
+});
+
+test("옛 모음 뒤에서 현대 받침과 방점을 더한다", () => {
+  const final = OLD_HANGUL_FINALS.find((item) => item.label === "ㄴ");
+  const tone = OLD_HANGUL_KEYS.find((item) => item.role === "tone");
+  const first = insertOldHangul("ᄒᆞ", 2, 2, final);
+  assert.equal(first.value, "ᄒᆞᆫ");
+  const second = insertOldHangul(first.value, first.caret, first.caret, tone);
+  assert.equal(second.value, "ᄒᆞᆫ〮");
+});
+
+test("현대 글자는 그대로 두고 새 옛 초성을 시작한다", () => {
+  const key = OLD_HANGUL_KEYS.find((item) => item.char === "ᅌ");
+  assert.equal(insertOldHangul("한", 1, 1, key).value, "한ᅌ");
+});
+
+test("단독 현대 자음 뒤에 아래아를 붙인다", () => {
+  const key = OLD_HANGUL_KEYS.find((item) => item.char === "ᆞ");
+  assert.equal(insertOldHangul("ㅎ", 1, 1, key).value, "ᄒᆞ");
 });
 
 test("참고문헌 편집 페이지에 원본 칸과 저장 버튼이 있다", () => {

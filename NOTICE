@@ -36,6 +36,19 @@ The files here are WOFF2 subsets built from the upstream OTFs by
 tools/serif-font.sh. The OFL permits subsetting and redistribution.
 
 --------------------------------------------------------------------------------
+Noto Serif CJK KR — fonts/noto-serif-old-hangul.woff2,
+                    fonts/noto-serif-missing-hangul.woff2
+--------------------------------------------------------------------------------
+Old Hangul conjoining jamo and tone marks use the first subset. The second
+subset supplies modern Hangul syllables whose mapped glyphs have no outlines
+in Chosun Shinmyeongjo. Other modern syllables remain in Shinmyeongjo. Both
+WOFF2 files come from the official Korean Regular OTF. The Old Hangul subset
+also includes contextual glyphs needed to shape archaic syllables.
+
+  Source:  https://github.com/notofonts/noto-cjk/tree/main/Serif/OTF/Korean
+  License: SIL Open Font License 1.1 — fonts/noto-serif-old-hangul-OFL.txt
+
+--------------------------------------------------------------------------------
 Geist Mono — fonts/geist-mono.woff2
 --------------------------------------------------------------------------------
 Code is set in this. Copyright (c) 2023 Vercel, in collaboration with

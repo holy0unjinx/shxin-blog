@@ -32,3 +32,5 @@ for pair in "sm-base:$BASE" "sm-han:$HAN"; do
     --no-hinting
   printf '%-16s %8s bytes\n' "fonts/$name.woff2" "$(stat -c%s "fonts/$name.woff2")"
 done
+# 신명조 base에는 빈 현대 음절이 남는다. 이후 tools/old-hangul-font.sh를
+# 실행해 그 항목을 제거하고 Noto 대체 글꼴을 다시 만들어야 한다.

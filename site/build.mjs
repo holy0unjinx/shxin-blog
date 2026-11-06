@@ -4,11 +4,12 @@ import {
   mkdir,
   readdir,
   readFile,
+  rename,
   rm,
   stat,
   writeFile,
 } from "node:fs/promises";
-import { existsSync, rmSync } from "node:fs";
+import { existsSync, renameSync, rmSync } from "node:fs";
 import { basename, extname, join, relative, resolve, sep } from "node:path";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 
@@ -59,7 +60,11 @@ const root = process.cwd();
 const postsDir = resolve(root, process.env.POSTS_DIR || "posts");
 // OUT_DIR lets the test suite build into a scratch directory instead of
 // racing against a server that is serving dist/.
-const output = resolve(root, process.env.OUT_DIR || "dist");
+// 내보낼 자리. 빌드 중에는 옆 폴더에 쓰고, 다 된 뒤에만 이 이름으로 바꾼다.
+// 먼저 지우면 dev 서버가 그 빈 자리를 그대로 서빙해서 전부 404가 된다.
+// 빌드가 중간에 죽어도 지금 서빙 중인 결과는 남는다.
+const published = resolve(root, process.env.OUT_DIR || "dist");
+let output = published;
 const siteUrl = (process.env.SITE_URL || "https://shxin.blog").replace(
   /\/+$/,
   "",
@@ -133,8 +138,10 @@ async function write(path, html) {
 // dev 서버가 파일 변경마다 빌드를 다시 부르는데 그 사이에 빌드를 한 번 더
 // 부르면 그렇게 된다. 자물쇠 하나로 차례를 세운다 — mkdir은 이미 있으면
 // 실패하므로 그 자체가 배타적인 신호다.
-const lockPath = `${output}.lock`;
+const lockPath = `${published}.lock`;
+const previous = `${published}.prev`;
 let holdsLock = false;
+let publishing = false;
 const dropLock = () => {
   if (!holdsLock) return;
   holdsLock = false;
@@ -144,9 +151,18 @@ const dropLock = () => {
     // 이미 없으면 그만이다.
   }
 };
+const restorePublished = () => {
+  if (!publishing || existsSync(published) || !existsSync(previous)) return;
+  try {
+    renameSync(previous, published);
+  } catch {
+    // 되돌리지 못하면 다음 빌드가 다시 채운다.
+  }
+};
 process.on("exit", dropLock);
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
+    restorePublished();
     dropLock();
     process.exit(130);
   });
@@ -170,6 +186,7 @@ for (let attempt = 0; ; attempt++) {
   }
 }
 
+output = `${published}.next`;
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
@@ -480,7 +497,7 @@ const katexStyle =
     : "";
 
 const ogFontFiles = await Promise.all(
-  ["cmu-regular", "cmu-bold", "sm-base", "sm-han"].map((name) =>
+  ["cmu-regular", "cmu-bold", "sm-base", "sm-han", "noto-serif-old-hangul", "noto-serif-missing-hangul"].map((name) =>
     readFile(join(fontDir, `${name}.woff2`)),
   ),
 );
@@ -700,8 +717,8 @@ const routes = new Set([
 // dev 전용 편집기. 나가는 빌드에는 페이지도, 그 스타일도, 그 코드도 없다.
 // sitemap·rss·posts.json 어디에도 넣지 않는다 — 읽을 글이 아니다.
 if (DEV) {
-  for (const asset of ["editor.css", "editor.js", "refs-editor.js"]) {
-    const source = await readFile(join(root, asset), "utf8");
+  for (const asset of ["editor.css", "editor.js", "refs-editor.js", "old-hangul.mjs"]) {
+    const source = await readFile(join(root, asset === "old-hangul.mjs" ? "site" : "", asset), "utf8");
     // 지문을 붙이지 않는다. dev 서버는 무엇이든 no-cache로 내보내므로
     // 이름이 바뀔 이유가 없고, 이름이 고정이라야 편집기 페이지가 그것을
     // 그냥 가리킬 수 있다.
@@ -716,7 +733,7 @@ if (DEV) {
       math: true,
       katexStyle,
       styles: ["/editor.css"],
-      scripts: ["/editor.js"],
+      moduleScripts: ["/editor.js"],
     },
   }));
   await write("/write/refs/", page({
@@ -836,6 +853,21 @@ if (twins.size)
   console.log(
     `  ${twins.size} webp twin(s), ${(twinsSaved / 1024).toFixed(0)} KiB smaller than the photographs they stand in for`,
   );
+
+// 이름이 바뀌는 동안만 요청이 빈다. 빌드 내내 비워 두는 것과 달리
+// 그 틈은 rename 두 번이라, 서빙 중인 서버가 404에 머물지 않는다.
+await rm(previous, { recursive: true, force: true });
+publishing = true;
+try {
+  if (existsSync(published)) await rename(published, previous);
+  await rename(output, published);
+} catch (error) {
+  restorePublished();
+  throw error;
+} finally {
+  publishing = false;
+}
+await rm(previous, { recursive: true, force: true });
 
 dropLock();
 

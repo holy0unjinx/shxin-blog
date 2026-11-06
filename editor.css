@@ -81,6 +81,28 @@ main.paper:has(.write) footer {
   background: var(--bg-mark);
   border-color: var(--ink);
 }
+.write-old-hangul > p {
+  margin: 8px 0;
+  color: var(--muted);
+  font: 12px/1.5 var(--serif);
+}
+.write-old-hangul button {
+  font: 14px var(--serif);
+}
+.write-old-finals {
+  width: 100%;
+  margin: 0 0 10px;
+}
+.write-old-finals > summary {
+  cursor: pointer;
+  font: 12px Arial, sans-serif;
+}
+.write-old-finals > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-top: 8px;
+}
 
 /* ── 원고 ───────────────────────────────────────────────── */
 
