@@ -57,18 +57,27 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
     if (doc) doc.documentElement.dataset.theme = document.documentElement.dataset.theme;
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
+  // 고른 폭이 미리보기 칸보다 넓으면 칸에 맞춘다. 768·1280을 골라도
+  // 편집기 칸이 더 좁으면 가로 스크롤 대신 그 폭으로 줄인다 — 그때
+  // iframe viewport도 줄어 @media가 실제 보이는 폭을 따른다.
+  let chosenWidth = "768";
+  function applyPreviewWidth() {
+    const room = previewScroll.clientWidth;
+    const next = room > 0 ? Math.min(Number(chosenWidth), room) : Number(chosenWidth);
+    frame.width = String(next);
+    previewScroll.scrollLeft = 0;
+  }
   function setPreviewWidth(width) {
     if (!["390", "768", "1280"].includes(width)) return;
-    frame.width = width;
+    chosenWidth = width;
     for (const button of widthButtons)
       button.setAttribute("aria-pressed", String(button.dataset.previewWidth === width));
-    requestAnimationFrame(() => {
-      previewScroll.scrollLeft = Math.max(0, (frame.offsetWidth - previewScroll.clientWidth) / 2);
-    });
+    applyPreviewWidth();
     try { localStorage.setItem(WIDTH_STORE, width); } catch { /* storage unavailable */ }
   }
   for (const button of widthButtons)
     button.addEventListener("click", () => setPreviewWidth(button.dataset.previewWidth));
+  new ResizeObserver(applyPreviewWidth).observe(previewScroll);
   try {
     setPreviewWidth(localStorage.getItem(WIDTH_STORE) || "768");
   } catch {
