@@ -79,7 +79,7 @@ const CSP = [
   "font-src 'self' data: https://cdn.jsdelivr.net",
   "img-src 'self' data: https:",
   "media-src 'self' https:",
-  "frame-src https:",
+  `frame-src ${DEV ? "'self' " : ""}https:`,
   "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'none'",

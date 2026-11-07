@@ -73,7 +73,7 @@ export function lintArticle(article, { routes = null, fileExists = null } = {}) 
   for (const path of document.missingFiles ?? [])
     at("error", `읽을 수 없는 파일을 가리킨다 — ${path}`);
   for (const kind of document.unreadable ?? [])
-    at("warn", `${kind} 펜스를 읽지 못해 코드 블록으로 나갔다`);
+    at("warn", kind === "그림 속성" ? "그림 속성은 float=left/right 또는 caption=top/bottom만 쓸 수 있다 — 기본 조판으로 나갔다" : `${kind} 펜스를 읽지 못해 코드 블록으로 나갔다`);
 
   for (const match of String(html).match(UNDEFINED_REF) ?? [])
     at("warn", `정의되지 않은 참조식 링크로 보인다 — ${match}`);

@@ -17,19 +17,18 @@ const CARET = "$0";
 /**
  * 새 글의 앞머리.
  *
- * 새 글에 필요한 값과 주소를 직접 고를 때 쓰는 slug만 적어 둔다.
- * 그 밖의 선택 항목은 필요한 글에만 더한다.
+ * 새 글이면 거의 늘 적게 되는 것만 둔다. categorySlug·seriesSlug는 이름에서
+ * 저절로 만들어지므로(한글도 그대로 주소가 된다) 양식에 두면 채워야 하는
+ * 칸처럼 보인다. 로마자 주소를 따로 쓰고 싶은 글에서만 손으로 더한다.
+ * series·part·readme·fold·bib도 같은 뜻에서 뺀다.
  */
 export const STARTER = `---
 title: "제목"
 date: ${new Date().toISOString().slice(0, 10)}
 category: 분류
-categorySlug:
 slug: new-post
 description: "한 줄 요약."
 keywords: 키워드, 둘
-series:
-seriesSlug:
 ---
 
 여기서부터 씁니다.
@@ -91,6 +90,7 @@ export const GROUPS = [
     items: [
       { label: "점 목록", block: true, snippet: `- ${CARET}\n- 둘\n  - 중첩` },
       { label: "번호 목록", block: true, snippet: `1. ${CARET}\n2. 둘` },
+      { label: "동그라미 목록", block: true, snippet: `① ${CARET}\n② 둘` },
       { label: "할 일", block: true, snippet: `- [x] 끝난 일\n- [ ] ${CARET}` },
       {
         label: "정의 목록",
@@ -190,6 +190,16 @@ export const GROUPS = [
         label: "캡션 없는 그림",
         block: true,
         snippet: `![대체 텍스트](/assets/sample.png)${CARET}`,
+      },
+      {
+        label: "본문 옆 사진",
+        block: true,
+        snippet: `![대체 텍스트](/assets/sample.png "${CARET}"){float=right}`,
+      },
+      {
+        label: "아래 캡션 그림",
+        block: true,
+        snippet: `![대체 텍스트](/assets/sample.png "${CARET}"){caption=bottom}`,
       },
       {
         label: "둘을 한 줄에",
@@ -580,7 +590,14 @@ export function writePage() {
     `</div>` +
     `<textarea class="write-text" spellcheck="false" aria-label="원고"></textarea>` +
     `</section>` +
-    `<section class="write-preview"><div class="write-paper paper"></div></section>` +
+    `<section class="write-preview"><div class="write-preview-bar"><span>미리보기 폭</span>` +
+    `<div class="write-preview-widths" role="group" aria-label="미리보기 화면 폭">` +
+    `<button type="button" data-preview-width="390" aria-pressed="false">390px</button>` +
+    `<button type="button" data-preview-width="768" aria-pressed="true">768px</button>` +
+    `<button type="button" data-preview-width="1280" aria-pressed="false">1280px</button>` +
+    `</div></div><div class="write-preview-scroll">` +
+    `<iframe class="write-frame" src="/write/frame/" title="글 미리보기" width="768" sandbox="allow-same-origin"></iframe>` +
+    `</div></section>` +
     `<p class="write-status" role="status"></p>` +
     `<script type="application/json" class="write-snippets">${safeJson(data)}</script>` +
     `</div>`

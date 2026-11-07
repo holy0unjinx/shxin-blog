@@ -352,6 +352,11 @@ test("편집기 페이지는 dev 빌드에만 선다", async () => {
   assert.match(html, /href="\/editor\.css"/);
   // 나가는 빌드에는 없다.
   assert.equal((await fetch(base + "/write/")).status, 404);
+  const frame = await fetch(devBase + "/write/frame/");
+  assert.equal(frame.status, 200);
+  assert.match(frame.headers.get("content-security-policy"), /frame-src 'self' https:/);
+  assert.match(await frame.text(), /class="write-paper"/);
+  assert.equal((await fetch(base + "/write/frame/")).status, 404);
 });
 
 test("참고문헌 편집기와 코드는 개발 빌드에만 선다", async () => {

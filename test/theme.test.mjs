@@ -197,6 +197,10 @@ test("제목과 초록은 한글 어절을 중간에서 끊지 않는다", () =>
 
 test("둥근 모서리가 없다", () => {
   // 장식보다 정밀함이 먼저다. 버튼도 카드도 인풋도 코드 칩도 각지게 둔다.
+  //
+  // 50%는 모서리를 둥글린 것이 아니라 원 그 자체여서 이 규칙 밖이다. 다만
+  // 그 틈으로 장식이 새지 않도록, 아래에서 원이 설 수 있는 자리를 따로
+  // 묶어 둔다.
   const rounded = [
     ...css.matchAll(/border-radius:\s*([^;}]+)/g),
     ...readFileSync(join(root, "editor.css"), "utf8").matchAll(
@@ -204,8 +208,17 @@ test("둥근 모서리가 없다", () => {
     ),
   ]
     .map((match) => match[1].trim())
-    .filter((value) => !/^0[a-z%]*$/.test(value));
+    .filter((value) => !/^(?:0[a-z%]*|50%)$/.test(value));
   assert.deepEqual(rounded, [], `둥근 모서리가 남아 있다: ${rounded.join(", ")}`);
+});
+
+test("원은 동그라미 숫자 목록의 표시 하나뿐이다", () => {
+  // 위 규칙의 예외는 여기 적힌 자리에서만 선다. 새 원을 그리려면 이 시험을
+  // 먼저 고쳐야 하고, 그 자리에서 정말 원이어야 하는지 한 번 더 묻게 된다.
+  const circles = [...css.matchAll(/([^{}]+)\{[^}]*border-radius:\s*50%/g)].map(
+    (match) => match[1].trim().split("\n").pop().trim(),
+  );
+  assert.deepEqual(circles, [".prose ol.circled > li::before"]);
 });
 
 test("그림의 껍데기에도 둥근 모서리가 없다", () => {

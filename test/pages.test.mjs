@@ -10,9 +10,11 @@ import { after, before, test } from "node:test";
 
 import {
   PAGE_SIZE,
+  categoryPage,
   homePage,
   pageCount,
   pagePath,
+  postPage,
   topLevelBlocks,
   yearOf,
 } from "../site/pages.mjs";
@@ -257,6 +259,32 @@ test("the home page lists the series and the years beside the categories", () =>
   assert.match(html, /<a href="\/series\/%EC%82%AC%EC%84%A4-ca-%EC%84%B8%EC%9A%B0%EA%B8%B0\/">사설 CA 세우기 <span>\(3\)<\/span><\/a>/);
   assert.match(html, /<section class="categories" id="years"><p>Years<\/p>/);
   assert.match(html, /<a href="\/2026\/">2026 <span>\(3\)<\/span><\/a>/);
+});
+
+test("로고가 있는 분류는 이름 대신 로고가 선다", () => {
+  const sample = [{ category: "선린", categorySlug: "sunrint", slug: "post", title: "글", date: "2026-01-01", description: "요약" }];
+  const marks = new Set(["sunrint"]);
+  const home = homePage(sample, 1, marks);
+  // 칩과 목록 카드 둘 다. 이름은 alt로 남으므로 그림을 못 받는 자리와
+  // 읽어 주는 기계에는 그대로 이름이 간다.
+  const img = /<img class="category-mark" src="\/assets\/categories\/sunrint\.svg" alt="선린"/g;
+  assert.equal(home.match(img)?.length, 2, "칩과 카드 둘 다에 로고가 서야 한다");
+  // 같은 말을 두 번 하지 않는다 — 로고 곁에 이름이 글자로 또 서면 안 된다.
+  assert.doesNotMatch(home, /alt="선린"[^>]*>선린/);
+  assert.doesNotMatch(home, /<a href="\/category\/sunrint\/"[^>]*>선린/);
+
+  // 분류 쪽의 제목 자리. h1은 남고 그 안에 로고가 든다.
+  const page = categoryPage("선린", sample, "sunrint", null, marks);
+  assert.match(page, /<h1 class="category-title has-mark"><img class="category-mark"[^>]*alt="선린"[^>]*><\/h1>/);
+
+  // 글머리에도 선다.
+  const article = postPage(sample[0], { html: "", headings: [] }, {}, marks);
+  assert.match(article, /<p class="eyebrow"><a href="\/category\/sunrint\/"><img class="category-mark"[^>]*alt="선린"/);
+
+  // 로고가 없는 분류는 예전 그대로 이름이 글자로 선다.
+  assert.doesNotMatch(categoryPage("선린", sample, "sunrint"), /category-mark/);
+  assert.match(categoryPage("선린", sample, "sunrint"), /<h1 class="category-title">선린<\/h1>/);
+  assert.doesNotMatch(postPage(sample[0], { html: "", headings: [] }, {}), /category-mark/);
 });
 
 test("a home page that already holds every post has no pager and no second page", () => {

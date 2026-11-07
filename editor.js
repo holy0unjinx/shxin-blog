@@ -14,7 +14,9 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
   const rail = root.querySelector(".write-rail");
   const text = root.querySelector(".write-text");
   const slug = root.querySelector(".write-slug");
-  const paper = root.querySelector(".write-paper");
+  const frame = root.querySelector(".write-frame");
+  const previewScroll = root.querySelector(".write-preview-scroll");
+  const widthButtons = [...root.querySelectorAll("[data-preview-width]")];
   const status = root.querySelector(".write-status");
   const save = root.querySelector(".write-save");
   const load = root.querySelector(".write-load");
@@ -24,7 +26,54 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
   );
 
   const STORE = "paper-blog-write";
+  const WIDTH_STORE = "paper-blog-preview-width";
   const CARET = "$0";
+
+  // 프레임의 viewport가 실제 선택 폭이다. 본문 CSS의 @media도 이 폭을
+  // 따르므로 좁은 화면의 그림·수식·글자 크기를 별도로 흉내 낼 필요가 없다.
+  let previewHtml = "";
+  function showPreview() {
+    const doc = frame.contentDocument;
+    const target = doc?.querySelector(".write-paper");
+    if (!target) return;
+    target.innerHTML = previewHtml;
+    doc.documentElement.dataset.theme = document.documentElement.dataset.theme;
+  }
+  const boundFrames = new WeakSet();
+  function frameReady() {
+    showPreview();
+    const doc = frame.contentDocument;
+    if (!doc || boundFrames.has(doc)) return;
+    boundFrames.add(doc);
+    doc.addEventListener("click", (event) => {
+      const link = event.target.closest?.("a[href]");
+      if (link && !link.getAttribute("href").startsWith("#")) event.preventDefault();
+    });
+  }
+  frame.addEventListener("load", frameReady);
+  if (frame.contentDocument?.readyState === "complete") frameReady();
+  new MutationObserver(() => {
+    const doc = frame.contentDocument;
+    if (doc) doc.documentElement.dataset.theme = document.documentElement.dataset.theme;
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function setPreviewWidth(width) {
+    if (!["390", "768", "1280"].includes(width)) return;
+    frame.width = width;
+    for (const button of widthButtons)
+      button.setAttribute("aria-pressed", String(button.dataset.previewWidth === width));
+    requestAnimationFrame(() => {
+      previewScroll.scrollLeft = Math.max(0, (frame.offsetWidth - previewScroll.clientWidth) / 2);
+    });
+    try { localStorage.setItem(WIDTH_STORE, width); } catch { /* storage unavailable */ }
+  }
+  for (const button of widthButtons)
+    button.addEventListener("click", () => setPreviewWidth(button.dataset.previewWidth));
+  try {
+    setPreviewWidth(localStorage.getItem(WIDTH_STORE) || "768");
+  } catch {
+    setPreviewWidth("768");
+  }
 
   function remember() {
     try {
@@ -153,7 +202,8 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
       say(`렌더 실패 — ${answer.message}`);
       return;
     }
-    paper.innerHTML = answer.content;
+    previewHtml = answer.content;
+    showPreview();
     if (!slug.value && answer.slug && answer.slug !== "preview")
       slug.value = answer.slug;
     const count = answer.lint.length;

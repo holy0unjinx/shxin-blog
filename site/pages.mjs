@@ -29,6 +29,25 @@ function categoryLink(post) {
   return `/category/${encodeURIComponent(post.categorySlug)}/`;
 }
 
+/**
+ * 분류의 이름이 설 자리.
+ *
+ * 로고가 있으면 이름 대신 로고가 선다 — 둘을 나란히 두면 같은 말을 두 번
+ * 하는 셈이고, 로고를 둔 까닭이 그 이름을 글자로 읽히고 싶지 않아서다.
+ * 글자는 alt로 남으므로 그림을 못 받는 자리와 읽어 주는 기계에는 그대로
+ * 이름이 간다. 크기는 CSS가 자리마다 정한다 — 목록과 글머리에서는 곁의
+ * 라벨 글자 크기를 따라간다.
+ */
+function categoryName(name, slug, marks) {
+  if (!marks || !marks.has(slug)) return esc(name);
+  // 비율은 로고의 viewBox(4120×1100)를 따른다. 어긋나면 그림이 늦게 올 때
+  // 그 자리가 한 번 흔들린다.
+  return (
+    `<img class="category-mark" src="/assets/categories/${encodeURIComponent(slug)}.svg"` +
+    ` alt="${esc(name)}" width="150" height="40">`
+  );
+}
+
 function seriesLink(post) {
   return `/series/${encodeURIComponent(post.seriesSlug)}/`;
 }
@@ -52,13 +71,13 @@ function readingText(post) {
 // The newest post opens the archive at a larger size when `lead` is set, the
 // way a journal gives its cover to one article. Every other card is the same
 // as it was.
-function postCards(posts, { currentCategory = "", lead = false } = {}) {
+function postCards(posts, { currentCategory = "", lead = false, marks = null } = {}) {
   return posts
     .map((post, index) => {
       const reading = readingText(post);
       const category = post.categorySlug === currentCategory ? ' aria-current="page"' : "";
       const first = lead && index === 0 ? " is-lead" : "";
-      return `<article class="post-card${first}${post.draft ? " is-draft" : ""}"><div class="post-meta"><time datetime="${esc(post.date)}">${dateText(post.date)}</time>${post.draft ? '<span class="draft-mark">초안</span>' : ""}<a href="${categoryLink(post)}"${category}>${esc(post.category)}</a>${reading ? `<span class="reading">${reading}</span>` : ""}</div><h2><a href="/${encodeURIComponent(post.slug)}/">${esc(post.title)}</a></h2><p>${esc(post.description)}</p><a class="read" href="/${encodeURIComponent(post.slug)}/">Read article <span>→</span></a></article>`;
+      return `<article class="post-card${first}${post.draft ? " is-draft" : ""}"><div class="post-meta"><time datetime="${esc(post.date)}">${dateText(post.date)}</time>${post.draft ? '<span class="draft-mark">초안</span>' : ""}<a href="${categoryLink(post)}"${category}>${categoryName(post.category, post.categorySlug, marks)}</a>${reading ? `<span class="reading">${reading}</span>` : ""}</div><h2><a href="/${encodeURIComponent(post.slug)}/">${esc(post.title)}</a></h2><p>${esc(post.description)}</p><a class="read" href="/${encodeURIComponent(post.slug)}/">Read article <span>→</span></a></article>`;
     })
     .join("");
 }
@@ -69,20 +88,20 @@ function chipRow({ id, label, items }) {
   return (
     `<section class="categories" id="${id}"><p>${esc(label)}</p><div>${items
       .map(
-        ({ href, name, count }) =>
-          `<a href="${href}">${esc(name)}${count ? ` <span>(${count})</span></a>` : "</a>"}`,
+        ({ href, text, count }) =>
+          `<a href="${href}">${text}${count ? ` <span>(${count})</span></a>` : "</a>"}`,
       )
       .join("")}</div></section>`
   );
 }
 
-function categoryChips(posts) {
+function categoryChips(posts, marks) {
   const seen = new Map();
   for (const post of posts)
     if (!seen.has(post.categorySlug)) seen.set(post.categorySlug, post);
   return [...seen.values()].map((post) => ({
     href: categoryLink(post),
-    name: post.category,
+    text: categoryName(post.category, post.categorySlug, marks),
     count: posts.filter((item) => item.categorySlug === post.categorySlug).length,
   }));
 }
@@ -93,7 +112,7 @@ function seriesChips(posts) {
     if (post.series && !seen.has(post.seriesSlug)) seen.set(post.seriesSlug, post);
   return [...seen.values()].map((post) => ({
     href: seriesLink(post),
-    name: post.series,
+    text: esc(post.series),
     count: posts.filter((item) => item.seriesSlug === post.seriesSlug).length,
   }));
 }
@@ -102,7 +121,7 @@ function yearChips(posts) {
   const years = [...new Set(posts.map(yearOf).filter(Boolean))].sort().reverse();
   return years.map((year) => ({
     href: `/${year}/`,
-    name: year,
+    text: esc(year),
     count: posts.filter((post) => yearOf(post) === year).length,
   }));
 }
@@ -128,27 +147,27 @@ function pager(number, total) {
  * 홈과 그 뒷쪽. number는 1부터이고, 1쪽만 첫 글을 크게 세운다 — 표지는
  * 한 번만 있는 것이다.
  */
-export function homePage(posts, number = 1) {
+export function homePage(posts, number = 1, categoryMarks = new Set()) {
   const total = pageCount(posts);
   const here = posts.slice((number - 1) * PAGE_SIZE, number * PAGE_SIZE);
   return (
     `<section class="archive-title"><p>Archive — ${String(posts.length).padStart(2, "0")} articles</p></section>` +
-    `<section class="post-list">${postCards(here, { lead: number === 1 })}</section>` +
+    `<section class="post-list">${postCards(here, { lead: number === 1, marks: categoryMarks })}</section>` +
     pager(number, total) +
     // 칩은 쪽마다 선다. 머리글의 Categories가 가리키는 곳이 홈의 닻이고,
     // 뒷쪽에서 그 닻만 없으면 옛 글을 보다 분야로 건너뛸 수가 없다.
-    chipRow({ id: "categories", label: "Categories", items: categoryChips(posts) }) +
+    chipRow({ id: "categories", label: "Categories", items: categoryChips(posts, categoryMarks) }) +
     chipRow({ id: "series", label: "Series", items: seriesChips(posts) }) +
     chipRow({ id: "years", label: "Years", items: yearChips(posts) })
   );
 }
 
-export function yearPage(year, posts) {
+export function yearPage(year, posts, categoryMarks = null) {
   return (
     `<section class="category-head"><a class="back" href="/">← Archive</a>` +
     `<p class="eyebrow">Year</p><h1>${esc(year)}</h1>` +
     `<p>${posts.length}개의 글</p></section>` +
-    `<section class="post-list">${postCards(posts)}</section>`
+    `<section class="post-list">${postCards(posts, { marks: categoryMarks })}</section>`
   );
 }
 
@@ -344,26 +363,27 @@ function relatedPosts(posts = []) {
   );
 }
 
-export function postPage(post, document, siblings = {}) {
+export function postPage(post, document, siblings = {}, categoryMarks = null) {
   const reading = readingText(post);
-  return `<article class="article"><a class="back" href="/">← Archive</a><header class="article-head"><p class="eyebrow">${post.draft ? '<span class="draft-mark">초안</span> · ' : ""}<a href="${categoryLink(post)}">${esc(post.category)}</a> · ${dateText(post.date)}${
+  return `<article class="article"><a class="back" href="/">← Archive</a><header class="article-head"><p class="eyebrow">${post.draft ? '<span class="draft-mark">초안</span> · ' : ""}<a href="${categoryLink(post)}">${categoryName(post.category, post.categorySlug, categoryMarks)}</a> · ${dateText(post.date)}${
     post.updated && post.updated !== post.date
       ? ` · ${esc(dateText(post.updated))} 고침`
       : ""
   }${reading ? ` · ${reading}` : ""}</p><h1>${esc(post.title)}</h1>${seriesBanner(post, siblings.series)}<dl class="deck"><dt>Abstract</dt><dd class="abstract">${esc(post.description)}</dd></dl>${keywordLine(post.keywords)}</header>${toc(document.headings)}<div class="rule"></div><div class="prose">${document.html}</div>${postNav(siblings)}${relatedPosts(siblings.related)}</article>`;
 }
 
-export function keywordPage(name, posts) {
+export function keywordPage(name, posts, categoryMarks = null) {
   return (
     `<section class="category-head"><a class="back" href="/">← Archive</a>` +
     `<p class="eyebrow">Keyword</p><h1>${esc(name)}</h1>` +
     `<p>${posts.length}개의 글</p></section>` +
-    `<section class="post-list">${postCards(posts)}</section>`
+    `<section class="post-list">${postCards(posts, { marks: categoryMarks })}</section>`
   );
 }
 
-export function categoryPage(name, posts, categorySlug = "", readme = null) {
-  return `<section class="category-head"><a class="back" href="/">← Archive</a><p class="eyebrow">Category</p><h1>${esc(name)}</h1><p>${posts.length}개의 글</p></section>${readmeBox(readme, name)}<section class="post-list">${postCards(posts, { currentCategory: categorySlug })}</section>`;
+export function categoryPage(name, posts, categorySlug = "", readme = null, categoryMarks = new Set()) {
+  const marked = categoryMarks?.has?.(categorySlug) ? " has-mark" : "";
+  return `<section class="category-head"><a class="back" href="/">← Archive</a><p class="eyebrow">Category</p><h1 class="category-title${marked}">${categoryName(name, categorySlug, categoryMarks)}</h1><p>${posts.length}개의 글</p></section>${readmeBox(readme, name)}<section class="post-list">${postCards(posts, { currentCategory: categorySlug, marks: categoryMarks })}</section>`;
 }
 
 export function notFoundPage() {

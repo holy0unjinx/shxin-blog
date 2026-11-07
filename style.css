@@ -795,6 +795,46 @@ footer {
   padding: 0 1.2em 0.9em;
 }
 
+/* ─── 동그라미 숫자 목록 ──────────────────────────────────────────────────
+   원고에 "① 첫째"라고 적으면 이 목록이 된다. 표시는 글꼴에서 찾지 않고
+   그린다 — 할 일 칸의 체크와 같은 까닭이고, 여기서는 이유가 하나 더 있다.
+   신명조에는 ①–⑮만 있어 열여섯째 칸부터 글꼴이 갈리는데, 그린 동그라미는
+   항목이 몇이든 같은 모양으로 선다. 번호도 목록이 세므로 원고의 글자가
+   ①②③이든 ①①①이든 나오는 번호는 차례대로다. */
+.prose ol.circled {
+  counter-reset: circled;
+  list-style: none;
+}
+.prose ol.circled > li {
+  counter-increment: circled;
+  /* 일반 목록과 같은 본문 시작선에 놓고, 번호만 왼쪽 여백에 건다. */
+  position: relative;
+}
+.prose ol.circled > li::before {
+  align-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  content: counter(circled);
+  display: flex;
+  /* 번호는 라벨 층의 글자다. 본문 명조로 두면 동그라미 안에서 커 보인다. */
+  font:
+    0.72em/1 Arial,
+    sans-serif;
+  height: 1.7em;
+  justify-content: center;
+  left: -2.8em;
+  position: absolute;
+  /* 본문 첫 줄의 가운데에 맞춘다. 줄 높이 1.8의 절반에서 제 높이의 절반을
+     뺀 자리다. */
+  top: 0.32em;
+  width: 1.7em;
+}
+/* 딸린 목록은 일반 목록과 같은 들여쓰기를 따른다. */
+.prose ol.circled > li > ul,
+.prose ol.circled > li > ol {
+  margin-top: 0.4em;
+}
+
 /* ─── 할 일 목록 ──────────────────────────────────────────────────────────
    상자는 잠겨 있다. 브라우저 기본 상자는 켜진 자리에 파란색을 들고 오는데
    이 종이에는 색이 없으므로, 테두리와 체크를 직접 그린다. */
@@ -865,6 +905,40 @@ footer {
 }
 .prose figure {
   margin: 2em 0;
+}
+/* 사진과 캡션을 함께 띄운다. 본문의 큰 블록은 사진 옆의 좁은 열에
+   끼워 넣지 않고 다음 전폭 줄에서 시작한다. */
+.prose::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.prose > figure.figure-float {
+  width: min(38%, 280px);
+  margin: 0.3em 1.4em 1em 0;
+  float: left;
+}
+.prose > figure.figure-float-right {
+  float: right;
+  margin: 0.3em 0 1em 1.4em;
+}
+.prose > figure.figure-float .caption-row {
+  flex-wrap: wrap;
+}
+.prose > figure.figure-float .caption-aside {
+  white-space: normal;
+}
+.prose > :is(h2, h3, h4, h5, h6, .table-wrap, .code-block, .math-display,
+  .math-block, .callout, .callout-box, .environment, .figure-row,
+  blockquote, figure:not(.figure-float)) {
+  clear: both;
+}
+@media (max-width: 640px) {
+  .prose > figure.figure-float {
+    float: none;
+    width: auto;
+    margin: 2em 0;
+  }
 }
 /* 그림 둘을 한 줄에. 칸 수는 문법이 정하고(--cols), 좁은 화면에서는 한 줄에
    하나로 돌아간다 — 나란히 두는 뜻은 비교인데, 칸이 좁아 글자가 안 읽히면
@@ -945,6 +1019,9 @@ footer {
   max-width: 100%;
   width: 100%;
 }
+.prose img {
+  height: auto;
+}
 /* 그림 캡션은 표·그래프 캡션과 같은 것이다. 한 글에 캡션이 두 종류로
    보이지 않아야 하므로 자리(그림 위)·글꼴·크기·정렬을 그쪽에 맞춘다.
    코드 툴바도 <figcaption>이라 요소를 하나 더 적어 그쪽과 갈라 둔다. */
@@ -955,6 +1032,9 @@ footer {
   margin: 0 0 var(--space-2);
   text-align: left;
   text-indent: 0;
+}
+.prose figure.figure-caption-bottom > figcaption {
+  margin: var(--space-2) 0 0;
 }
 .prose figure > figcaption .caption-row {
   align-items: baseline;
@@ -1357,6 +1437,9 @@ footer {
 .categories a {
   border: 1px solid var(--line);
   color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font: 11px var(--mono);
   padding: 7px 10px;
   text-decoration: none;
@@ -1367,6 +1450,11 @@ footer {
 }
 .categories a span {
   color: var(--muted);
+}
+.categories .category-mark {
+  display: block;
+  width: 68px;
+  height: auto;
 }
 /* 세 칩 목록(분류·시리즈·연도)은 같은 규칙을 쓴다. 첫 줄만 위 여백이 크고,
    뒤따르는 것들은 서로 붙어 한 묶음으로 읽힌다. */
@@ -1526,6 +1614,32 @@ footer {
   letter-spacing: -0.06em;
   line-height: 1.1;
   margin: 0;
+}
+/* 분류 제목이 로고일 때. h1은 남아 있고 그 안에 그림이 선다 — 쪽의 제목이
+   사라지면 안 되고, 이름은 alt가 진다. 글자 제목의 자리를 그대로 쓰도록
+   줄 상자를 블록으로 두고 아래 여백만 제목과 맞춘다. */
+.category-title.has-mark {
+  line-height: 0;
+}
+.category-head .category-mark {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+}
+/* 목록 카드와 글머리의 로고. 곁에 선 라벨 글자(11~12px Arial)와 같은 층이므로
+   높이를 em으로 매어 그 글자를 따라 줄인다. 로고는 글자보다 눈에 띄므로 em
+   그대로면 커 보인다 — 한 단계 낮춰 라벨과 같은 무게로 읽히게 한다. */
+.post-meta .category-mark,
+.eyebrow .category-mark {
+  display: inline-block;
+  width: auto;
+  height: 1.35em;
+  /* 글자 기준선에 앉힌다. 기본값 baseline이면 그림의 아래가 기준선에 붙어
+     곁의 글자보다 한참 떠 보인다. */
+  vertical-align: -0.3em;
+}
+:root[data-theme="dark"] .category-mark {
+  filter: invert(1);
 }
 .category-head > p:last-child {
   color: var(--muted);
@@ -2359,6 +2473,14 @@ footer {
    길잡이·검색·테마 단추, 옆여백의 자, 글 끝의 다른 글 링크는 종이에서 할 일이
    없다. 링크는 주소를 펼쳐 종이에서도 따라갈 수 있게 한다. */
 @media print {
+  .prose > figure.figure-float {
+    float: none;
+    width: auto;
+    margin: 2em 0;
+  }
+  .category-mark {
+    filter: none !important;
+  }
   .skip-link,
   .site-head,
   .toc,

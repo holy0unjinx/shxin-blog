@@ -48,6 +48,10 @@ also includes contextual glyphs needed to shape archaic syllables.
   Source:  https://github.com/notofonts/noto-cjk/tree/main/Serif/OTF/Korean
   License: SIL Open Font License 1.1 — fonts/noto-serif-old-hangul-OFL.txt
 
+The sunrint category mark at assets/categories/sunrint.svg contains the
+outlines of 善隣商高 from the official Korean Black OTF of the same family.
+It does not depend on an installed font when displayed.
+
 --------------------------------------------------------------------------------
 Geist Mono — fonts/geist-mono.woff2
 --------------------------------------------------------------------------------

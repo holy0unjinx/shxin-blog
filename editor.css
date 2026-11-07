@@ -190,9 +190,54 @@ main.paper:has(.write) footer {
 
 .write-preview {
   grid-area: preview;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-left: 1px solid var(--line);
   min-width: 0;
+  min-height: 0;
+}
+.write-preview-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex: none;
+  padding: 0 var(--space-2) var(--space-2);
+  color: var(--muted);
+  font: 12px Arial, sans-serif;
+}
+.write-preview-widths {
+  display: flex;
+  gap: 4px;
+}
+.write-preview-widths button {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 3px 7px;
+  font: inherit;
+}
+.write-preview-widths button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.write-preview-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  background: var(--bg-mark);
+}
+.write-frame {
+  display: block;
+  height: 100%;
+  min-height: 320px;
+  margin: 0 auto;
+  border: 0;
+  background: var(--paper);
 }
 /* 안쪽 .paper는 style.css가 정한 720px 그대로다. 실제 글과 같은 폭이라야
    줄바꿈과 사이드노트가 같은 자리에서 일어난다. */
@@ -297,5 +342,7 @@ main.paper:has(.write) footer {
   .write-preview {
     border-left: 0;
     border-top: 1px solid var(--line);
+    height: 65dvh;
+    min-height: 360px;
   }
 }

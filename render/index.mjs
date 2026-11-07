@@ -321,7 +321,22 @@ function numberFootnotes(source) {
   );
 }
 
-const LIST_ITEM = /^(\s*)([-*+]|\d+\.)\s+(.*)$/;
+// 동그라미 숫자도 번호 목록의 표시다. ①–⑳, ㉑–㉟, ㊱–㊿ 세 구간이고,
+// 한국어 글에서 손으로 치는 번호가 대개 이 글자들이다.
+//
+// 표시 뒤에는 공백이 있어야 한다. "①번 항목을 보자"처럼 글자에 바로 붙는
+// 쪽은 목록이 아니라 문장이고, 공백 하나가 그 둘을 가른다.
+const CIRCLED = /[①-⑳㉑-㉟㊱-㊿]/;
+const LIST_ITEM =
+  /^(\s*)([-*+]|\d+\.|[①-⑳㉑-㉟㊱-㊿])\s+(.*)$/;
+
+// 표시의 갈래. 같은 깊이에서 갈래가 바뀌면 거기서 목록이 하나 끝난다 —
+// 동그라미와 1.은 둘 다 ol이지만 세는 모양이 다르므로 한 목록이 아니다.
+function markerKind(marker) {
+  if (CIRCLED.test(marker)) return "circled";
+  if (/\d/.test(marker)) return "ordered";
+  return "bullet";
+}
 const HR = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
 const BLOCK_REF = /^@@BLOCK\d+@@$/;
 
@@ -440,7 +455,7 @@ const TASK_ITEM = /^\[([ xX])\]\s+(.*)$/;
 function collectList(lines, start, text) {
   const first = lines[start].match(LIST_ITEM);
   const baseIndent = first[1].length;
-  const ordered = /\d/.test(first[2]);
+  const kind = markerKind(first[2]);
   const items = [];
   let i = start;
 
@@ -458,14 +473,17 @@ function collectList(lines, start, text) {
       continue;
     }
     // A marker switch at the same depth starts a separate list.
-    if (/\d/.test(match[2]) !== ordered) break;
+    if (markerKind(match[2]) !== kind) break;
     items.push({ text: match[3], children: "" });
     i++;
   }
 
-  const tag = ordered ? "ol" : "ul";
+  const tag = kind === "bullet" ? "ul" : "ol";
   const tasks = items.some((item) => TASK_ITEM.test(item.text));
-  const html = `<${tag}${tasks ? ' class="task-list"' : ""}>${items
+  const classes = [kind === "circled" && "circled", tasks && "task-list"].filter(
+    Boolean,
+  );
+  const html = `<${tag}${classes.length ? ` class="${classes.join(" ")}"` : ""}>${items
     .map((item) => {
       const task = item.text.match(TASK_ITEM);
       if (!task) return `<li>${text(item.text)}${item.children}</li>`;
@@ -582,20 +600,37 @@ export function renderDocument(source, options = {}) {
 
   // 그림 하나. 크기를 아는 그림이면 width·height가 박혀 레이아웃이 튀지
   // 않는다(options.measure가 그것을 안다).
-  const figure = (alt, src, caption) => {
+  const figure = (alt, src, caption, { float = "", captionBottom = false } = {}) => {
     const numbered = numberCaption(numbering, "fig", caption || "");
     const size = measure?.(src);
     const dimensions = size
       ? ` width="${size.width}" height="${size.height}"`
       : "";
-    // 캡션은 그림 위에 선다. 표와 그래프가 그렇고, 한 글에서 캡션이 어느
-    // 때는 위 어느 때는 아래에 있으면 읽는 쪽이 매번 찾아야 한다.
+    const classes = [
+      float && `figure-float figure-float-${float}`,
+      captionBottom && "figure-caption-bottom",
+    ].filter(Boolean).join(" ");
+    const label = figcaption(numbered);
+    const image = `<img src="${esc(safeUrl(src))}" alt="${esc(alt)}"${dimensions} loading="lazy" decoding="async">`;
     return (
-      `<figure${numbered.id ? ` id="${esc(numbered.id)}"` : ""}>` +
-      figcaption(numbered) +
-      `<img src="${esc(safeUrl(src))}" alt="${esc(alt)}"${dimensions} loading="lazy" decoding="async">` +
+      `<figure${numbered.id ? ` id="${esc(numbered.id)}"` : ""}${classes ? ` class="${classes}"` : ""}>` +
+      (captionBottom ? image + label : label + image) +
       `</figure>`
     );
+  };
+
+  const imageOptions = (source, allowFloat = true) => {
+    if (source === undefined) return {};
+    const attrs = readAttrs(source);
+    const valid = Object.keys(attrs).length > 0 && Object.keys(attrs).every((key) =>
+      key === "caption" ? ["top", "bottom"].includes(attrs[key]) :
+      key === "float" && allowFloat && ["left", "right"].includes(attrs[key]),
+    );
+    if (!valid) {
+      unreadable.push("그림 속성");
+      return {};
+    }
+    return { float: attrs.float || "", captionBottom: attrs.caption === "bottom" };
   };
 
   // 줄을 읽기 전에 들어 올리는 것들. 펜스·블록 수식·그림은 여러 줄을 지고
@@ -638,9 +673,9 @@ export function renderDocument(source, options = {}) {
           .filter(Boolean)
           .map((line) => {
             const image = line.match(
-              /^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)$/,
+              /^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)(?:\{([^}\n]*)\})?$/,
             );
-            return image ? figure(image[1], image[2], image[3]) : "";
+            return image ? figure(image[1], image[2], image[3], imageOptions(image[4], false)) : "";
           })
           .filter(Boolean);
         if (drawn.length) {
@@ -686,8 +721,10 @@ export function renderDocument(source, options = {}) {
       );
     })
     .replace(
-      /^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)$/gm,
-      (_, alt, src, caption) => block(figure(alt, src, caption)).trim(),
+      /^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)(?:\{([^}\n]*)\})?$/gm,
+      (_, alt, src, caption, options) => {
+        return block(figure(alt, src, caption, imageOptions(options))).trim();
+      },
     )
     .replace(/^!video\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)$/gm,
       (_, alt, src, caption) => {

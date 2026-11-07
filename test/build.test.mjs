@@ -855,7 +855,7 @@ test("the day a post was fixed stands beside the day it was written", () => {
 // ── dev 전용 편집기 ─────────────────────────────────────────
 
 test("나가는 빌드에는 편집기가 없다", () => {
-  for (const path of ["write/index.html", "editor.js", "editor.css", "old-hangul.mjs"])
+  for (const path of ["write/index.html", "write/frame/index.html", "editor.js", "editor.css", "old-hangul.mjs"])
     assert.equal(existsSync(join(dist, path)), false, path);
 });
 
@@ -871,6 +871,10 @@ test("DEV 빌드에는 편집기가 선다", () => {
   assert.ok(existsSync(join(devDist, "editor.js")));
   assert.ok(existsSync(join(devDist, "old-hangul.mjs")));
   assert.ok(existsSync(join(devDist, "editor.css")));
+  const frame = readDev("write/frame/index.html");
+  assert.match(frame, /<meta name="viewport" content="width=device-width, initial-scale=1">/);
+  assert.match(frame, /href="\/style\.[0-9a-f]{8}\.css"/);
+  assert.match(frame, /class="write-paper"/);
   // 편집기에서는 언제든 수식을 칠 수 있으므로, 글에 수식이 없어도 KaTeX가
   // 나간다.
   const katex = readdirSync(devDist).find((name) => /^katex\.[0-9a-f]{8}\.css$/.test(name));

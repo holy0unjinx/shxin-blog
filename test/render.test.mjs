@@ -244,6 +244,14 @@ test("an image with no caption is a figure with no number", () => {
   );
 });
 
+test("an image can put its numbered caption below, including when floated", () => {
+  const html = renderMarkdown('![사진](/a.png "설명"){float=right caption=bottom}');
+  assert.match(html, /<figure id="fig-1" class="figure-float figure-float-right figure-caption-bottom"><img[^>]*><figcaption>/);
+  assert.match(html, /<span class="caption-number">그림 1\.<\/span> 설명/);
+  assert.match(renderMarkdown('![a](/a.png "설명"){caption=bottom}'), /class="figure-caption-bottom"><img[^>]*><figcaption>/);
+  assert.match(renderMarkdown('![a](/a.png "설명"){caption=top}'), /<figcaption>[\s\S]*<\/figcaption><img/);
+});
+
 test("a figure opts out of the series with nonumber", () => {
   const html = renderMarkdown('![alt](/a.png "{nonumber} 장식")');
   assert.doesNotMatch(html, /caption-number/);
@@ -1001,6 +1009,49 @@ test("a list with no boxes is an ordinary list", () => {
   assert.equal(renderMarkdown("- 하나\n- 둘"), "<ul><li>하나</li><li>둘</li></ul>");
 });
 
+test("동그라미 숫자도 번호 목록의 표시다", () => {
+  assert.equal(
+    renderMarkdown("① 첫째\n② 둘째\n③ 셋째"),
+    '<ol class="circled"><li>첫째</li><li>둘째</li><li>셋째</li></ol>',
+  );
+  // ㉑–㉟, ㊱–㊿ 구간도 같은 표시다.
+  assert.equal(
+    renderMarkdown("㉑ 스물하나\n㊱ 서른여섯"),
+    '<ol class="circled"><li>스물하나</li><li>서른여섯</li></ol>',
+  );
+  // 번호는 목록이 센다. 원고의 글자가 어긋나도 나오는 차례는 바르다.
+  assert.equal(
+    renderMarkdown("③ 하나\n① 둘"),
+    '<ol class="circled"><li>하나</li><li>둘</li></ol>',
+  );
+});
+
+test("동그라미 숫자가 글자에 붙으면 문장이다", () => {
+  // "①번 항목을 보자"는 목록이 아니다. 표시와 글 사이의 공백 하나가 그 둘을
+  // 가른다 — 다른 표시와 같은 규칙이다.
+  assert.equal(renderMarkdown("①번 항목을 보자."), "<p>①번 항목을 보자.</p>");
+});
+
+test("동그라미 목록은 1. 목록과 한 목록이 아니다", () => {
+  // 둘 다 ol이지만 세는 모양이 다르다. 같은 깊이에서 표시가 바뀌면 거기서
+  // 목록이 하나 끝난다 — 글머리표와 번호 사이에서 이미 그렇게 한다.
+  assert.equal(
+    renderMarkdown("1. 하나\n① 둘"),
+    '<ol><li>하나</li></ol><ol class="circled"><li>둘</li></ol>',
+  );
+  assert.equal(
+    renderMarkdown("- 하나\n① 둘"),
+    '<ul><li>하나</li></ul><ol class="circled"><li>둘</li></ol>',
+  );
+});
+
+test("동그라미 목록도 딸린 목록을 받는다", () => {
+  assert.equal(
+    renderMarkdown("① 바깥\n  - 안쪽\n② 바깥2"),
+    '<ol class="circled"><li>바깥<ul><li>안쪽</li></ul></li><li>바깥2</li></ol>',
+  );
+});
+
 test("search text drops the new markers and keeps the letters", () => {
   const body = [
     "첫 줄\\",
@@ -1104,6 +1155,31 @@ test("a figures fence puts its images in one row", () => {
   );
   assert.match(html, /<div class="figure-row" style="--cols:2">/);
   assert.equal(html.match(/<figure id="fig-\d"/g).length, 2);
+});
+
+test("a standalone photo can float without changing captions or ordinary figures", () => {
+  const { html } = renderDocument(
+    '![인물](/person.jpg "{#fig:person} 사진"){float=right}\n\n옆 문단.\n\n![보통](/wide.png "전폭")',
+  );
+  assert.match(html, /<figure id="fig-person" class="figure-float figure-float-right">/);
+  assert.match(html, /alt="인물"[^>]*loading="lazy"/);
+  assert.match(html, /사진/);
+  assert.match(html, /<figure id="fig-2"><figcaption>/);
+  assert.doesNotMatch(html, /<figure id="fig-2" class=/);
+  assert.match(renderMarkdown('![a](/a.png){float=left}'), /class="figure-float figure-float-left"/);
+});
+
+test("invalid photo float stays full width and reports the option", () => {
+  const { html, unreadable } = renderDocument('![a](/a.png){float=middle}');
+  assert.match(html, /<figure><img /);
+  assert.doesNotMatch(html, /figure-float/);
+  assert.deepEqual(unreadable, ["그림 속성"]);
+});
+
+test("a figures fence can put captions below without floating its cells", () => {
+  const html = renderMarkdown('```figures {cols=2}\n![a](/a.png "왼쪽"){caption=bottom}\n![b](/b.png "오른쪽")\n```');
+  assert.match(html, /class="figure-caption-bottom"><img[^>]*><figcaption>/);
+  assert.match(html, /<figure id="fig-2"><figcaption>/);
 });
 
 test("a figures fence with no readable image falls back to a code block", () => {

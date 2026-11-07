@@ -280,6 +280,17 @@ async function copyKatex() {
 if (existsSync(join(root, "assets")))
   await cp(join(root, "assets"), join(output, "assets"), { recursive: true });
 
+// 분류 마크는 같은 slug의 SVG가 있을 때만 붙인다. 분류 이름은 그대로
+// 남기므로 마크가 없는 분류도 기존과 똑같이 읽힌다.
+const categoryMarksDir = join(root, "assets", "categories");
+const categoryMarks = new Set(
+  existsSync(categoryMarksDir)
+    ? (await readdir(categoryMarksDir))
+        .filter((file) => file.endsWith(".svg"))
+        .map((file) => file.slice(0, -4))
+    : [],
+);
+
 // 사진마다 webp 쌍둥이를 굽는다 — sharp가 이 기계에 있을 때만. 없으면 이
 // 단계는 아무 일도 하지 않고, 페이지는 글쓴이가 넣은 그림을 그대로 가리킨다.
 // 원본은 남아 <picture>의 물러설 자리가 되므로, 두 기계가 내는 페이지는
@@ -517,7 +528,7 @@ for (const [index, { post, document, baked }] of articles.entries()) {
           }
         : null,
       related: related(post),
-    }),
+    }, categoryMarks),
     type: "article",
     date: post.date,
     keywords: post.keywords,
@@ -551,7 +562,7 @@ for (const [keywordSlug, { name, posts: list }] of keywords)
     path: `/keyword/${encodeURIComponent(keywordSlug)}/`,
     title: name,
     description: `"${name}"을 다룬 글 ${list.length}개.`,
-    content: keywordPage(name, list),
+    content: keywordPage(name, list, categoryMarks),
   }));
 
 const categories = new Map(posts.map((post) => [post.categorySlug, post.category]));
@@ -562,7 +573,7 @@ for (const [categorySlug, name] of categories) {
     path: `/category/${encodeURIComponent(categorySlug)}/`,
     title: name,
     description: `${name} 카테고리의 글 ${list.length}개.`,
-    content: categoryPage(name, list, categorySlug, readme),
+    content: categoryPage(name, list, categorySlug, readme, categoryMarks),
     assets: { math: Boolean(readme?.math), katexStyle },
   }));
 }
@@ -601,7 +612,7 @@ for (const year of years)
     path: `/${year}/`,
     title: year,
     description: `${year}년에 쓴 글 ${posts.filter((post) => yearOf(post) === year).length}개.`,
-    content: yearPage(year, posts.filter((post) => yearOf(post) === year)),
+    content: yearPage(year, posts.filter((post) => yearOf(post) === year), categoryMarks),
   }));
 
 // 홈과 그 뒷쪽. 글이 한 쪽에 다 들어가면 뒷쪽은 아예 나지 않으므로, 글이
@@ -615,7 +626,7 @@ for (let number = 1; number <= pages; number += 1)
       number === 1
         ? "the blog of shxin"
         : `전체 글 ${posts.length}개 가운데 ${number}쪽.`,
-    content: homePage(posts, number),
+    content: homePage(posts, number, categoryMarks),
     current: "home",
   }));
 
@@ -724,6 +735,15 @@ if (DEV) {
     // 그냥 가리킬 수 있다.
     await writeFile(join(output, asset), source);
   }
+  // 독립된 창의 viewport가 390/768/1280px이 되어야 본문 미리보기에도
+  // 실제 화면과 같은 @media 규칙이 적용된다. 원고는 부모가 같은 출처의
+  // 프레임에 넣으며, 이 빈 페이지와 스타일은 개발 빌드에만 낸다.
+  await write("/write/frame/", `<!doctype html><html lang="ko"><head>` +
+    `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<title>글 미리보기</title><link rel="stylesheet" href="${assets.get("/style.css")}">` +
+    `${katexStyle ? `<link rel="stylesheet" href="${katexStyle}">` : ""}` +
+    `<link rel="stylesheet" href="/editor.css"></head>` +
+    `<body><main class="paper"><div class="write-paper"></div></main></body></html>`);
   await write("/write/", page({
     path: "/write/",
     title: "쓰기",

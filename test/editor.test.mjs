@@ -152,21 +152,21 @@ test("새 글 앞머리가 빌드가 읽는 꼴이다", () => {
   assert.ok(data.slug);
   assert.ok(data.description);
   assert.notEqual(body.trim(), "");
-  // 기본 양식에는 주소를 직접 고를 때 쓰는 slug가 보인다.
-  for (const key of [
-    "title",
-    "date",
-    "category",
-    "categorySlug",
-    "slug",
-    "description",
-    "keywords",
-    "series",
-    "seriesSlug",
-  ])
+  // 새 글이면 거의 늘 적게 되는 것만 선다.
+  for (const key of ["title", "date", "category", "slug", "description", "keywords"])
     assert.ok(Object.hasOwn(data, key), `${key}가 없다`);
-  for (const key of ["part", "readme", "fold", "bib"])
-    assert.equal(Object.hasOwn(data, key), false, `${key}는 slug가 아니다`);
+  // 이름에서 저절로 만들어지거나 그 글에만 필요한 것은 양식에 두지 않는다.
+  // 빈 칸으로 세워 두면 채워야 하는 값처럼 보인다.
+  for (const key of [
+    "categorySlug",
+    "seriesSlug",
+    "series",
+    "part",
+    "readme",
+    "fold",
+    "bib",
+  ])
+    assert.equal(Object.hasOwn(data, key), false, `${key}는 양식에 없어야 한다`);
 });
 
 test("페이지가 제 조각을 다 담는다", () => {
@@ -177,6 +177,10 @@ test("페이지가 제 조각을 다 담는다", () => {
   assert.match(html, /class="write-load"/);
   assert.match(html, /class="write-save"/);
   assert.match(html, /class="write-preview"/);
+  assert.match(html, /data-preview-width="390"/);
+  assert.match(html, /data-preview-width="768"/);
+  assert.match(html, /data-preview-width="1280"/);
+  assert.match(html, /src="\/write\/frame\/"/);
   for (const group of GROUPS) assert.ok(html.includes(group.name), group.name);
   // 버튼 하나에 자리 번호 하나.
   const buttons = [...html.matchAll(/data-at="(\d+)\.(\d+)"/g)];
