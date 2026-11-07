@@ -15,7 +15,6 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
   const text = root.querySelector(".write-text");
   const slug = root.querySelector(".write-slug");
   const frame = root.querySelector(".write-frame");
-  const frameFit = root.querySelector(".write-frame-fit");
   const previewScroll = root.querySelector(".write-preview-scroll");
   const widthButtons = [...root.querySelectorAll("[data-preview-width]")];
   const status = root.querySelector(".write-status");
@@ -60,25 +59,27 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
 
   // iframe viewport는 고른 폭 그대로다. 칸이 더 좁으면 배율만 낮춰 맞춘다 —
   // width를 줄이면 @media가 바뀌어 768 미리보기가 아니게 된다.
+  // 높이는 CSS 변수로만 잡고, 여기서 clientHeight를 다시 쓰지 않는다.
+  // 예전에 높이·스크롤바를 건드릴 때마다 ResizeObserver가 다시 돌아 깜빡였다.
   let chosenWidth = "768";
+  let appliedKey = "";
   function applyPreviewWidth() {
     const wanted = Number(chosenWidth);
     const room = previewScroll.clientWidth;
-    const tall = previewScroll.clientHeight;
-    const scale = room > 0 ? Math.min(1, room / wanted) : 1;
-    frame.width = String(wanted);
-    frame.style.width = `${wanted}px`;
-    frame.style.height = scale > 0 ? `${tall / scale}px` : `${tall}px`;
-    frame.style.transform = scale === 1 ? "" : `scale(${scale})`;
-    if (frameFit) {
-      frameFit.style.width = `${wanted * scale}px`;
-      frameFit.style.height = `${tall}px`;
-    }
-    previewScroll.scrollLeft = 0;
+    if (room <= 0) return;
+    const scale = Math.min(1, room / wanted);
+    const key = `${wanted}:${room}`;
+    if (key === appliedKey) return;
+    appliedKey = key;
+    if (frame.getAttribute("width") !== String(wanted)) frame.width = String(wanted);
+    previewScroll.style.setProperty("--preview-width", `${wanted}px`);
+    previewScroll.style.setProperty("--preview-scale", String(scale));
+    previewScroll.style.setProperty("--preview-fit-width", `${wanted * scale}px`);
   }
   function setPreviewWidth(width) {
     if (!["390", "768", "1280"].includes(width)) return;
     chosenWidth = width;
+    appliedKey = "";
     for (const button of widthButtons)
       button.setAttribute("aria-pressed", String(button.dataset.previewWidth === width));
     applyPreviewWidth();

@@ -227,23 +227,27 @@ main.paper:has(.write) footer {
 .write-preview-scroll {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  /* 가로 스크롤바를 두면 clientWidth가 오락가락해 배율 루프가 돈다. */
+  overflow: hidden;
   border-top: 1px solid var(--line);
   background: var(--bg-mark);
 }
 /* 고른 미리보기 폭(iframe viewport)은 그대로 두고, 칸이 더 좁을 때만
    배율로 줄인다. width를 줄이면 @media가 바뀌어 미리보기가 거짓이 된다. */
 .write-frame-fit {
+  width: var(--preview-fit-width, 100%);
   height: 100%;
   margin: 0 auto;
   overflow: hidden;
 }
 .write-frame {
   display: block;
-  height: 100%;
+  width: var(--preview-width, 768px);
+  height: calc(100% / var(--preview-scale, 1));
   min-height: 320px;
   border: 0;
   background: var(--paper);
+  transform: scale(var(--preview-scale, 1));
   transform-origin: top left;
 }
 /* 안쪽 .paper는 style.css가 정한 720px 그대로다. 실제 글과 같은 폭이라야
