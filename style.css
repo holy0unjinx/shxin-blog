@@ -179,6 +179,11 @@
    글은 그 중 일부일 뿐이다. unicode-range가 서로 겹치지 않으므로 브라우저는
    페이지에 실제로 나온 글자가 든 쪽만 받는다. 여기 적은 범위와
    tools/split-font.sh에 적은 범위는 반드시 같아야 한다. */
+/* 두 벌의 Noto는 신명조보다 줄 상자가 훨씬 크다 — 신명조가 em의 86%/14%를
+   쓰는 자리에서 Noto는 115.1%/28.6%를 쓴다. 그대로 두면 Noto 글자가 한 자
+   섞인 줄만 상자가 44% 커져, 그 줄이 통째로 다른 글꼴처럼 보인다. 세 값을
+   신명조에 맞춰 덮어쓰면 줄 높이가 흔들리지 않는다. 글자 모양은 그대로이고
+   줄을 세우는 셈만 같아진다. */
 /* 옛한글의 초·중·종성은 한 글꼴에서 함께 조합해야 한다. */
 @font-face {
   font-family: "옛한글 명조";
@@ -186,6 +191,9 @@
   font-display: swap;
   font-weight: normal;
   font-style: normal;
+  ascent-override: 86%;
+  descent-override: 14%;
+  line-gap-override: 0%;
   unicode-range: U+1100-11FF, U+A960-A97F, U+D7B0-D7FF, U+302E-302F;
 }
 /* 신명조에서 윤곽선이 빈 현대 음절은 cmap에서도 빼 두었다. 그런 음절만
@@ -196,6 +204,9 @@
   font-display: swap;
   font-weight: normal;
   font-style: normal;
+  ascent-override: 86%;
+  descent-override: 14%;
+  line-gap-override: 0%;
   unicode-range: U+AC00-D7A3;
 }
 @font-face {

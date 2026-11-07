@@ -564,6 +564,36 @@ test("the font ships in two parts, each named after its contents", () => {
   assert.doesNotMatch(styles, /sm-base\.woff2/, "지문 없는 주소가 남았다");
 });
 
+test("대체 글꼴은 신명조의 줄 상자를 그대로 쓴다", () => {
+  // Noto는 em의 115.1%/28.6%를 쓰고 신명조는 86%/14%를 쓴다. 덮어쓰지 않으면
+  // Noto 글자가 한 자 섞인 줄만 상자가 커져, 그 줄이 통째로 다른 글꼴처럼
+  // 보인다. 두 대체 글꼴 모두 신명조의 값을 지고 나가야 한다.
+  const css = readdirSync(dist).find((name) => /^style\./.test(name));
+  const styles = readFileSync(join(dist, css), "utf8");
+  for (const family of ["옛한글 명조", "신명조 대체"]) {
+    const face = styles.match(
+      new RegExp(`@font-face\\{[^}]*font-family:"${family}"[^}]*\\}`),
+    )?.[0];
+    assert.ok(face, `${family}의 @font-face가 없다`);
+    assert.match(face, /ascent-override:86%/, family);
+    assert.match(face, /descent-override:14%/, family);
+    assert.match(face, /line-gap-override:0%/, family);
+  }
+});
+
+test("대체 글꼴 파일이 진짜 woff2다", () => {
+  // 선언은 format("woff2")인데 파일이 생 OpenType이면 브라우저가 그 얼굴을
+  // 통째로 버리고, 글자는 읽는 사람의 시스템 글꼴로 떨어진다.
+  for (const stem of ["noto-serif-missing-hangul", "noto-serif-old-hangul", "sm-base"]) {
+    const name = readdirSync(join(dist, "fonts")).find((file) =>
+      new RegExp(`^${stem}\\.[0-9a-f]{8}\\.woff2$`).test(file),
+    );
+    assert.ok(name, `${stem}이 나가지 않았다`);
+    const head = readFileSync(join(dist, "fonts", name)).subarray(0, 4).toString("latin1");
+    assert.equal(head, "wOF2", `${stem}이 woff2가 아니다 — ${head}`);
+  }
+});
+
 test("본문 로마자 글꼴이 굵기와 범위로 갈려 나간다", () => {
   // 네 벌(보통·굵게·기울임·굵은 기울임) × 두 범위(라틴·라틴 확장). 굵은
   // 글씨가 없는 글은 굵은 벌을 받지 않고, 라틴 확장 글자가 없는 글은 확장

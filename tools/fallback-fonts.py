@@ -25,12 +25,16 @@ def has_outline(glyphs, name):
 
 def save_subset(font, codepoints, path):
     options = subset.Options()
-    options.flavor = "woff2"
     options.hinting = False
     options.layout_features = ["*"]
     selected = subset.Subsetter(options=options)
     selected.populate(unicodes=codepoints)
     selected.subset(font)
+    # The flavor has to be set on the font. TTFont.save() does not read the
+    # subsetter's options, so an .otf source saved here would stay a bare
+    # OTTO file under a .woff2 name — which the browser rejects, because the
+    # stylesheet promises format("woff2").
+    font.flavor = "woff2"
     font.save(path)
 
 
