@@ -15,6 +15,7 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
   const text = root.querySelector(".write-text");
   const slug = root.querySelector(".write-slug");
   const frame = root.querySelector(".write-frame");
+  const frameFit = root.querySelector(".write-frame-fit");
   const previewScroll = root.querySelector(".write-preview-scroll");
   const widthButtons = [...root.querySelectorAll("[data-preview-width]")];
   const status = root.querySelector(".write-status");
@@ -57,14 +58,22 @@ import { insertOldHangul, OLD_HANGUL_FINALS, OLD_HANGUL_KEYS } from "./old-hangu
     if (doc) doc.documentElement.dataset.theme = document.documentElement.dataset.theme;
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  // 고른 폭이 미리보기 칸보다 넓으면 칸에 맞춘다. 768·1280을 골라도
-  // 편집기 칸이 더 좁으면 가로 스크롤 대신 그 폭으로 줄인다 — 그때
-  // iframe viewport도 줄어 @media가 실제 보이는 폭을 따른다.
+  // iframe viewport는 고른 폭 그대로다. 칸이 더 좁으면 배율만 낮춰 맞춘다 —
+  // width를 줄이면 @media가 바뀌어 768 미리보기가 아니게 된다.
   let chosenWidth = "768";
   function applyPreviewWidth() {
+    const wanted = Number(chosenWidth);
     const room = previewScroll.clientWidth;
-    const next = room > 0 ? Math.min(Number(chosenWidth), room) : Number(chosenWidth);
-    frame.width = String(next);
+    const tall = previewScroll.clientHeight;
+    const scale = room > 0 ? Math.min(1, room / wanted) : 1;
+    frame.width = String(wanted);
+    frame.style.width = `${wanted}px`;
+    frame.style.height = scale > 0 ? `${tall / scale}px` : `${tall}px`;
+    frame.style.transform = scale === 1 ? "" : `scale(${scale})`;
+    if (frameFit) {
+      frameFit.style.width = `${wanted * scale}px`;
+      frameFit.style.height = `${tall}px`;
+    }
     previewScroll.scrollLeft = 0;
   }
   function setPreviewWidth(width) {

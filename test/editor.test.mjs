@@ -180,6 +180,8 @@ test("페이지가 제 조각을 다 담는다", () => {
   assert.match(html, /data-preview-width="390"/);
   assert.match(html, /data-preview-width="768"/);
   assert.match(html, /data-preview-width="1280"/);
+  assert.match(html, /class="write-frame-fit"/);
+  assert.match(html, /class="write-frame"/);
   assert.match(html, /src="\/write\/frame\/"/);
   for (const group of GROUPS) assert.ok(html.includes(group.name), group.name);
   // 버튼 하나에 자리 번호 하나.

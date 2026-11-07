@@ -597,8 +597,9 @@ export function writePage() {
     `<button type="button" data-preview-width="768" aria-pressed="true">768px</button>` +
     `<button type="button" data-preview-width="1280" aria-pressed="false">1280px</button>` +
     `</div></div><div class="write-preview-scroll">` +
+    `<div class="write-frame-fit">` +
     `<iframe class="write-frame" src="/write/frame/" title="글 미리보기" width="768" sandbox="allow-same-origin"></iframe>` +
-    `</div></section>` +
+    `</div></div></section>` +
     `<p class="write-status" role="status"></p>` +
     `<script type="application/json" class="write-snippets">${safeJson(data)}</script>` +
     `</div>`
