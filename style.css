@@ -1229,6 +1229,17 @@ footer {
   border-bottom: 1px dotted var(--ink);
   cursor: help;
 }
+/* 독음. 원문 위에 읽기가 항상 선다. 툴팁처럼 가리키지 않아도 되고, 인쇄에도
+   남는다 — 읽는 글이지 장식이 아니다. */
+.prose ruby {
+  ruby-align: center;
+  ruby-position: over;
+}
+.prose rt {
+  font-size: 0.55em;
+  font-weight: 400;
+  line-height: 1.2;
+}
 /* 각주 번호에 얹히는 읽을거리. 자리를 잡는 것은 app.js이고, 여기서는 생김새만
    정한다. 창에 고정되어 있고 폭이 창보다 좁게 묶여 있으므로, 줄 끝의 각주에
    붙어도 문서를 옆으로 밀지 못한다. */

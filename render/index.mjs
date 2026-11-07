@@ -179,6 +179,15 @@ export function inline(text, notes, refs, context = {}) {
       if (!shown.length || shown.some((item) => item === null)) return token(whole);
       return token(`<span class="cite">(${shown.join("; ")})</span>`);
     })
+    // 독음. "{訓|훈}"은 원문 위에 읽기가 항상 보인다. 툴팁과 달리 가리키지
+    // 않아도 남고, 인쇄에도 남는다. 코드·수식 다음에 두어 담장 안은 손대지
+    // 않고, 툴팁보다 먼저 두어 "[{漢字|한자}](? 뜻)"에서 안쪽이 독음이 된다.
+    .replace(/\{([^{}|]+)\|([^{}]*)\}/g, (_, base, reading) => {
+      const shown = reading.trim();
+      // 독음이 비면 원문만 둔다. 빈 <rt>는 줄만 띄운다.
+      if (!shown) return token(base);
+      return token(`<ruby>${base}<rt>${shown}</rt></ruby>`);
+    })
     // A tooltip before the image and link rules: its reading holds spaces, so
     // no address pattern can claim it, and "!" in front stays a "!".
     .replace(/\[([^\]]+)\]\(\?\s*([^)]+)\)/g, (_, label, note) => {
@@ -262,6 +271,8 @@ export function plainText(text) {
     // 상호참조는 번호로 바뀔 글이므로, 속성이나 앵커 이름으로 갈 때는
     // 남기지 않는다.
     .replace(/\[@[^\]]+\]/g, "")
+    // 독음은 원문만 남긴다. 목차·앵커에 읽기가 끼면 주소가 흔들린다.
+    .replace(/\{([^{}|]+)\|([^{}]*)\}/g, "$1")
     // 표시를 걷어 내는 일과 밝혀 둔 표시를 글자로 남기는 일은 한 번에
     // 본다. 따로 돌리면 글자로 쓴 "*"가 표시를 걷을 때 함께 지워진다.
     // "_" is not emphasis in this renderer, so an identifier like
@@ -1091,6 +1102,8 @@ export function excerpt(body) {
     // 상호참조·인용·캡션 이름표는 번호나 목록으로 바뀔 표시다. 한 줄 요약에
     // 원고의 이름표가 남을 자리는 없다.
     .replace(/\[@[^\]]+\]/g, "")
+    // 독음은 원문만. 메타 설명에 읽기가 두 번 나오면 문장이 끊긴다.
+    .replace(/\{([^{}|]+)\|([^{}]*)\}/g, "$1")
     .replace(/\{#[a-z]+:[^}\s]+\}/gi, "")
     .replace(/\{\s*nonumber\s*\}/gi, "")
     // 주소 정의 줄, 알림 상자 이름표, 할 일 상자는 글이 아니다.
@@ -1141,6 +1154,8 @@ export function readingMinutes(body) {
     .replace(/^[ \t]*\[\/BOX\][ \t]*$/gim, " ")
     .replace(/\[[ xX]\]/g, " ")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // 독음의 읽기는 원문 위에 얹힌 같은 말이라 두 번 세지 않는다.
+    .replace(/\{([^{}|]+)\|([^{}]*)\}/g, "$1")
     .replace(/[*_`>#|~=-]/g, " ");
   const cjk = plain.match(/[\p{Script=Hangul}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu) || [];
   const words = plain.replace(/[\p{Script=Hangul}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu, " ")
@@ -1168,6 +1183,9 @@ export function searchText(body) {
     // 캡션의 이름표도 표시다. 그 자리에 나오는 글은 캡션 본문뿐이다.
     .replace(/\{#[a-z]+:[^}\s]+\}/gi, " ")
     .replace(/\{\s*nonumber\s*\}/gi, " ")
+    // 독음은 원문과 읽기를 모두 남긴다. 한자로 찾을 수도, 읽기로 찾을 수도
+    // 있어야 한다.
+    .replace(/\{([^{}|]+)\|([^{}]*)\}/g, "$1 $2")
     // 참조식 링크의 주소 정의는 자료다. 본문에서 부른 이름은 글자만 남는다.
     .replace(/^\[[^\^\]][^\]]*\]:[ \t]*\S+.*$/gm, " ")
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")

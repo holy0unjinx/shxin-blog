@@ -209,6 +209,57 @@ test("excerpt drops a tooltip reading and keeps its label", () => {
   assert.equal(excerpt("[TLS](? 키 교환과 인증)는 절차다."), "[TLS]는 절차다.");
 });
 
+test("독음은 원문 위에 읽기를 올린다", () => {
+  assert.equal(
+    inline("{訓民正音|훈민정음}"),
+    "<ruby>訓民正音<rt>훈민정음</rt></ruby>",
+  );
+  assert.equal(
+    inline("{訓|훈}{民|민}"),
+    "<ruby>訓<rt>훈</rt></ruby><ruby>民<rt>민</rt></ruby>",
+  );
+});
+
+test("독음이 비면 원문만 남는다", () => {
+  assert.equal(inline("{漢字|}"), "漢字");
+  assert.equal(inline("{漢字|   }"), "漢字");
+});
+
+test("파이프 없는 중괄호는 독음이 아니다", () => {
+  assert.equal(inline("{그냥}"), "{그냥}");
+  assert.equal(inline("{#fig:a}"), "{#fig:a}");
+});
+
+test("코드와 수식 안의 독음 표기는 손대지 않는다", () => {
+  assert.equal(inline("`{訓|훈}`"), "<code>{訓|훈}</code>");
+  assert.match(inline("${訓|훈}$"), /class="math math-inline"/);
+  assert.doesNotMatch(inline("${訓|훈}$"), /<ruby>/);
+});
+
+test("툴팁 안의 독음이 먼저 선다", () => {
+  assert.equal(
+    inline("[{漢字|한자}](? 한문의 글자)"),
+    '<span class="tooltip" data-note="한문의 글자" title="한문의 글자" ' +
+      'tabindex="0"><ruby>漢字<rt>한자</rt></ruby></span>',
+  );
+});
+
+test("제목의 독음은 원문만 목차와 앵커에 남긴다", () => {
+  const { html, headings } = renderDocument("# {訓民正音|훈민정음}");
+  assert.equal(headings[0].text, "訓民正音");
+  assert.equal(headings[0].id, "訓民正音");
+  assert.match(html, /<h2 id="訓民正音"><ruby>訓民正音<rt>훈민정음<\/rt><\/ruby><\/h2>/);
+});
+
+test("한 줄 요약은 독음의 원문만 남긴다", () => {
+  assert.equal(excerpt("{訓民正音|훈민정음}을 읽는다."), "訓民正音을 읽는다.");
+});
+
+test("검색은 독음의 원문과 읽기를 모두 담는다", () => {
+  assert.match(searchText("{訓民正音|훈민정음}"), /訓民正音/);
+  assert.match(searchText("{訓民正音|훈민정음}"), /훈민정음/);
+});
+
 test("horizontal rule is not parsed as a list", () => {
   assert.equal(
     renderMarkdown("above\n\n---\n\nbelow"),

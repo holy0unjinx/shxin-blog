@@ -45,6 +45,7 @@ export const GROUPS = [
       { label: "위첨자", snippet: `x^${CARET}^` },
       { label: "아래첨자", snippet: `H~${CARET}~O` },
       { label: "인라인 코드", snippet: `\`${CARET}\`` },
+      { label: "독음", snippet: `{${CARET}|독음}` },
       { label: "줄 끊기", snippet: `\\\n${CARET}` },
     ],
   },
